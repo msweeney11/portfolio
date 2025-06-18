@@ -34,7 +34,6 @@ app.get('/search', (req, res) => {
   res.send(term ? `You searched for: ${term}` : 'No search term provided.');
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
