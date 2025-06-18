@@ -5,7 +5,7 @@ Route 2: Using path parameter
 Example: http://localhost:5550/product/42
 
 Route 3: Both query + path
-Example: http://localhost:5550/user/Michael/details?age=25
+Example: http://localhost:5550/user/Michael/details?age=21
 
 Route 4: Multiple path params
 Example: http://localhost:5550/category/electronics/item/12
