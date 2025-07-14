@@ -7,7 +7,6 @@ from main import get_products,get_customers, get_prices, get_discounts, get_prod
 class TestQueries(unittest.TestCase):
 
     def test_get_products(self):
-        # Arrange: Create a mock cursor
         mock_cursor = Mock()
         expected_data = [('sg', 'Gibson SG', Decimal('2517.00'), Decimal('52.00')),
                          ('les_paul', 'Gibson Les Paul', Decimal('1199.00'), Decimal('30.00')),
@@ -21,11 +20,7 @@ class TestQueries(unittest.TestCase):
                          ('washburn', 'Washburn D10S', Decimal('299.00'), Decimal('0.00'))]
 
         mock_cursor.fetchall.return_value = expected_data
-
-        # Act: Call the function with the mock
         result = get_products(mock_cursor)
-
-        # Assert: Check that the result matches expected
         self.assertEqual(result, expected_data)
 
     def test_get_customers(self):
@@ -34,9 +29,9 @@ class TestQueries(unittest.TestCase):
                        ('Erin', 'Valentino', 'Valentino, Erin'),
                        ('Frank Lee', 'Wilson', 'Wilson, Frank Lee'),
                        ('Barry', 'Zimmer', 'Zimmer, Barry')]
+
       mock_cursor.fetchall.return_value = expected_data
       result = get_customers(mock_cursor)
-
       self.assertEqual(result, expected_data)
 
     def test_get_prices(self):
