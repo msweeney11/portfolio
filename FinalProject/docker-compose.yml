@@ -1,0 +1,12 @@
+# docker-compose.yml
+services:
+  fastapi:
+    build: ./fastapi
+    ports:
+      - "8000:8000"
+  bff:
+    build: ./bff
+    ports:
+      - "3000:3000"
+    depends_on:
+      - fastapi
