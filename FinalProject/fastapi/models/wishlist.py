@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey
-from .database import Base
+from database import Base
 
 class Wishlist(Base):
     __tablename__ = "wishlists"
