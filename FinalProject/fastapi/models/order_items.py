@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, ForeignKey
-from .database import Base
+from database import Base
 
 class OrderItem(Base):
     __tablename__ = "order_items"

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, DateTime
-from .database import Base
+from database import Base
 
 class PasswordEvent(Base):
     __tablename__ = "password_events"
