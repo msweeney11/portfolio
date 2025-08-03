@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <script src="api.js"></script>
+</head>
+<body>
+  <h2>Login</h2>
+  <form id="loginForm">
+    <input type="email" id="email" placeholder="Email" required />
+    <br />
+    <input type="password" id="password" placeholder="Password" required />
+    <br />
+    <button type="submit">Login</button>
+  </form>
+
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const result = await login(email, password);
+        console.log("Login response:", result);
+
+        if (result.success) {
+          alert("Login successful!");
+          // Redirect to another page if needed
+        } else {
+          alert("Login failed. Check your credentials.");
+        }
+      } catch (err) {
+        console.error("Error logging in:", err);
+        alert("An error occurred during login.");
+      }
+    });
+  </script>
+</body>
+</html>
