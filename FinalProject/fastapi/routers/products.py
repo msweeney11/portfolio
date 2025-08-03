@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from models.products import Product  # SQLAlchemy model
-from schemas.product import ProductCreate, ProductUpdate # Pydantic schemas
-from models.database import get_db  # DB session dependency
+from models import Product, get_db
+from schemas import ProductCreate, ProductUpdate
+from models import get_db  # DB session dependency
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
