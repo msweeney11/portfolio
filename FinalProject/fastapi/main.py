@@ -1,10 +1,15 @@
-# app/main.py
 from fastapi import FastAPI
-from routers import store
+from fastapi.middleware.cors import CORSMiddleware
+from routers import products
 
 app = FastAPI()
-#app.include_router(store.router)
 
-@app.get("/")
-def read_root():
-    return {"message": "FastAPI service is working!"}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust for production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(products.router)

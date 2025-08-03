@@ -1,41 +1,41 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "http://localhost:8000/products";
 
-export async function loginUser(email, password) {
-  const res = await fetch(`${BASE_URL}/login`, {
+// Create a product
+export async function createProduct(data) {
+  const res = await fetch(`${BASE_URL}/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify(data)
   });
   return await res.json();
 }
 
-export async function fetchProducts(filters) {
-  const query = new URLSearchParams(filters).toString();
-  const res = await fetch(`${BASE_URL}/products?${query}`);
+// Get all products
+export async function fetchProducts() {
+  const res = await fetch(`${BASE_URL}/`);
   return await res.json();
 }
 
-export async function fetchOrderHistory(userId) {
-  const res = await fetch(`${BASE_URL}/orders/${userId}`);
+// Get single product
+export async function fetchProductById(productId) {
+  const res = await fetch(`${BASE_URL}/${productId}`);
   return await res.json();
 }
 
-export async function createProduct(productData) {
-  const res = await fetch(`${BASE_URL}/admin/create`, {
-    method: "POST",
+// Update product
+export async function updateProduct(productId, updateData) {
+  const res = await fetch(`${BASE_URL}/${productId}`, {
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(productData)
+    body: JSON.stringify(updateData)
   });
   return await res.json();
 }
 
-export async function uploadImage(file) {
-  const formData = new FormData();
-  formData.append("image", file.buffer, file.originalname);
-
-  const res = await fetch(`${BASE_URL}/admin/upload`, {
-    method: "POST",
-    body: formData
+// Delete product
+export async function deleteProduct(productId) {
+  const res = await fetch(`${BASE_URL}/${productId}`, {
+    method: "DELETE"
   });
-  return await res.json();
+  return res.status === 204;
 }
