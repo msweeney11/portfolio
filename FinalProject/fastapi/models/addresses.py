@@ -1,9 +1,15 @@
-from sqlalchemy import Column, Integer, String
-from database import Base
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from .database import Base
 
 class Address(Base):
     __tablename__ = "addresses"
-    id = Column(Integer, primary_key=True)
-    street = Column(String(100))
-    city = Column(String(50))
-    zip_code = Column(String(10))
+
+    address_id = Column(Integer, primary_key=True)
+    customer_id = Column(Integer, ForeignKey("customers.customer_id"))
+    line1 = Column(String(60), nullable=False)
+    line2 = Column(String(60))
+    city = Column(String(40), nullable=False)
+    state = Column(String(2), nullable=False)
+    zip_code = Column(String(10), nullable=False)
+    phone = Column(String(12))
+    disabled = Column(Boolean, default=False)

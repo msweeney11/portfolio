@@ -1,9 +1,11 @@
-from sqlalchemy import Column, Integer, ForeignKey
-from database import Base
+from sqlalchemy import Column, BigInteger, Integer, ForeignKey, DateTime
+from .database import Base
 
 class CartItem(Base):
     __tablename__ = "cart_items"
-    id = Column(Integer, primary_key=True)
-    product_id = Column(Integer, ForeignKey("products.id"))
-    customer_id = Column(Integer, ForeignKey("customers.id"))
-    quantity = Column(Integer)
+
+    id = Column(BigInteger, primary_key=True)
+    customer_id = Column(Integer, ForeignKey("customers.customer_id"))
+    product_id = Column(Integer, ForeignKey("products.product_id"))
+    quantity = Column(Integer, nullable=False)
+    updated_at = Column(DateTime)

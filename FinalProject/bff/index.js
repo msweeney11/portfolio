@@ -39,7 +39,7 @@ async function main() {
   app.use("/api/admin", adminRoutes);
   app.use(handleError);
 
-  app.listen(4000, () => console.log("BFF running on port 4000"));
+  app.listen(4000, '0.0.0.0', () => console.log("BFF running on port 4000"));
 }
 
 main();

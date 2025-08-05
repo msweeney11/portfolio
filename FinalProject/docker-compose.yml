@@ -1,13 +1,49 @@
 # docker-compose.yml
+
 services:
   fastapi:
     build: ./fastapi
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
+    volumes:
+      - ./fastapi:/app
+    networks:
+      - backend
+    depends_on:
+      - mysql-db
+
   bff:
     build: ./bff
+    command: ["npm", "start"]
     ports:
-      - "3000:3000"
+      - "4000:4000"
+    volumes:
+      - ./bff:/app
+    networks:
+      - backend
     depends_on:
       - fastapi
+
+  mysql-db:
+    image: mysql:8.0
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: accessory_shop
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./db_init:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+
+volumes:
+  db-data:
+
+networks:
+  backend:
+    driver: bridge
+

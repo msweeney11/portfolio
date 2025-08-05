@@ -1,15 +1,23 @@
 const BASE_URL = "http://localhost:4000/api";
 
 // ------------------ AUTH ------------------ //
-export async function login(email, password) {
-  const res = await fetch(`${BASE_URL}/auth/login`, {
+async function login(email, password) {
+  const response = await fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify({ email, password }),
   });
-  return await res.json();
+
+  console.log("Fetch response:", response);
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error("Server error: " + response.status + " - " + errorText);
+  }
+
+  return await response.json();
 }
+
 
 // ---------------- PRODUCTS ---------------- //
 export async function getProducts(filters = {}) {
