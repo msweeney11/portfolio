@@ -15,21 +15,21 @@
       <a class="navbar-brand" href="index.html">Start Bootstrap</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-        aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
           <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
         </ul>
         <form class="d-flex gap-2">
           <a href="cart.html" class="btn btn-outline-dark">
-            <i class="bi-cart-fill me-1"></i>
-            Cart
-            <span class="badge bg-dark text-white ms-1 rounded-pill">3</span>
+            <i class="bi-cart-fill me-1"></i> Cart
+            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
           </a>
           <a href="wishlist.html" class="btn btn-outline-dark">
-            <i class="bi-heart-fill me-1"></i>
-            Wishlist
-            <span class="badge bg-dark text-white ms-1 rounded-pill">2</span>
+            <i class="bi-heart-fill me-1"></i> Wishlist
+            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
           </a>
         </form>
       </div>
@@ -40,31 +40,12 @@
   <section class="py-5">
     <div class="container px-4 px-lg-5">
       <h2 class="mb-4">Your Shopping Cart</h2>
-      <div class="list-group mb-4">
-        <div class="list-group-item d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <img src="https://dummyimage.com/100x100/dee2e6/6c757d.jpg" alt="Item" class="me-3" />
-            <div>
-              <h5 class="mb-1">Fancy Product</h5>
-              <small>$40.00</small>
-            </div>
-          </div>
-          <button class="btn btn-sm btn-outline-danger">Remove</button>
-        </div>
-        <div class="list-group-item d-flex justify-content-between align-items-center">
-          <div class="d-flex align-items-center">
-            <img src="https://dummyimage.com/100x100/dee2e6/6c757d.jpg" alt="Item" class="me-3" />
-            <div>
-              <h5 class="mb-1">Special Item</h5>
-              <small>$18.00</small>
-            </div>
-          </div>
-          <button class="btn btn-sm btn-outline-danger">Remove</button>
-        </div>
+      <div id="cart-items" class="list-group mb-4">
+        <!-- Cart items will be injected here by scripts.js -->
       </div>
       <div class="text-end">
-        <h4>Total: $58.00</h4>
-        <button class="btn btn-outline-dark mt-3">Proceed to Checkout</button>
+        <h4 id="cart-total">Total: $0.00</h4>
+        <a href="checkout.html" class="btn btn-outline-dark mt-3">Proceed to Checkout</a>
       </div>
     </div>
   </section>
@@ -72,10 +53,11 @@
   <!-- Footer -->
   <footer class="py-5 bg-dark">
     <div class="container">
-      <p class="m-0 text-center text-white">&copy; Your Website 2023</p>
+      <p class="m-0 text-center text-white">&copy; Your Website 2025</p>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/scripts.js"></script>
 </body>
 </html>

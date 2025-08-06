@@ -15,24 +15,23 @@
       <a class="navbar-brand" href="index.html">Start Bootstrap</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
-        aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
           <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="product-detail.html">Product Detail</a></li>
           <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
           <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
         </ul>
         <form class="d-flex gap-2">
           <a href="cart.html" class="btn btn-outline-dark">
-            <i class="bi-cart-fill me-1"></i>
-            Cart
-            <span class="badge bg-dark text-white ms-1 rounded-pill">3</span>
+            <i class="bi-cart-fill me-1"></i> Cart
+            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
           </a>
           <a href="wishlist.html" class="btn btn-outline-dark">
-            <i class="bi-heart-fill me-1"></i>
-            Wishlist
-            <span class="badge bg-dark text-white ms-1 rounded-pill">2</span>
+            <i class="bi-heart-fill me-1"></i> Wishlist
+            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
           </a>
         </form>
       </div>
@@ -52,49 +51,8 @@
   <!-- Product Grid -->
   <section class="py-5">
     <div class="container px-4 px-lg-5 mt-5">
-      <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-        <!-- Product Card -->
-        <div class="col mb-5">
-          <div class="card h-100">
-            <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="Fancy Product" />
-            <div class="card-body p-4">
-              <div class="text-center">
-                <h5 class="fw-bolder">Fancy Product</h5>
-                $40.00 - $80.00
-              </div>
-            </div>
-            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-              <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="product-detail.html">View options</a></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Repeat for other products -->
-        <div class="col mb-5">
-          <div class="card h-100">
-            <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
-            <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="Special Item" />
-            <div class="card-body p-4">
-              <div class="text-center">
-                <h5 class="fw-bolder">Special Item</h5>
-                <div class="d-flex justify-content-center small text-warning mb-2">
-                  <div class="bi-star-fill"></div>
-                  <div class="bi-star-fill"></div>
-                  <div class="bi-star-fill"></div>
-                  <div class="bi-star-fill"></div>
-                  <div class="bi-star-fill"></div>
-                </div>
-                <span class="text-muted text-decoration-line-through">$20.00</span>
-                $18.00
-              </div>
-            </div>
-            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-              <div class="text-center"><a class="btn btn-outline-dark mt-auto" href="product-detail.html">Add to cart</a></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Add more product cards as needed -->
+      <div id="product-grid" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+        <!-- Products will be injected here by scripts.js -->
       </div>
     </div>
   </section>
@@ -102,7 +60,7 @@
   <!-- Footer -->
   <footer class="py-5 bg-dark">
     <div class="container">
-      <p class="m-0 text-center text-white">&copy; Your Website 2023</p>
+      <p class="m-0 text-center text-white">&copy; Your Website 2025</p>
     </div>
   </footer>
 

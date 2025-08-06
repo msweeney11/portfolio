@@ -16,7 +16,7 @@ function requireLogin() {
   }
 }
 
-// 🏠 index.html — Load all products
+// Load all products
 async function loadProducts() {
   const res = await fetch('/api/products');
   const products = await res.json();
@@ -34,7 +34,7 @@ async function loadProducts() {
   });
 }
 
-// 📄 product-detail.html — Load single product
+// Load single product
 async function loadProductDetail() {
   const id = getQueryParam('id');
   const res = await fetch(`/api/products/${id}`);
@@ -45,7 +45,7 @@ async function loadProductDetail() {
   document.getElementById('product-image').src = product.image;
 }
 
-// 🔐 login.html — Handle login
+// Handle login
 async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById('email').value;
@@ -53,6 +53,7 @@ async function handleLogin(e) {
   const res = await fetch('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify({ email, password })
   });
   if (res.ok) {
@@ -62,7 +63,7 @@ async function handleLogin(e) {
   }
 }
 
-// 🧾 register.html — Handle registration
+// Handle registration
 async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById('name').value;
@@ -80,7 +81,7 @@ async function handleRegister(e) {
   }
 }
 
-// 🛒 cart.html — Load and manage cart
+// Load cart
 async function loadCart() {
   requireLogin();
   const res = await fetch('/api/cart');
@@ -98,13 +99,13 @@ async function loadCart() {
   });
 }
 
-// 🛒 Remove item from cart
+// Remove item from cart
 async function removeFromCart(id) {
   await fetch(`/api/cart/${id}`, { method: 'DELETE' });
   location.reload();
 }
 
-// ❤️ wishlist.html — Load wishlist
+// Load wishlist
 async function loadWishlist() {
   requireLogin();
   const res = await fetch('/api/wishlist');
@@ -122,13 +123,13 @@ async function loadWishlist() {
   });
 }
 
-// ❤️ Remove item from wishlist
+// Remove item from wishlist
 async function removeFromWishlist(id) {
   await fetch(`/api/wishlist/${id}`, { method: 'DELETE' });
   location.reload();
 }
 
-// 💳 checkout.html — Submit order
+// Submit order
 async function handleCheckout(e) {
   e.preventDefault();
   requireLogin();
@@ -146,7 +147,7 @@ async function handleCheckout(e) {
   }
 }
 
-// 📦 orders.html — Load past orders
+// Load past orders
 async function loadOrders() {
   requireLogin();
   const res = await fetch('/api/orders');
@@ -164,7 +165,7 @@ async function loadOrders() {
   });
 }
 
-// 👤 profile.html — Load and update profile
+// Load and update profile
 async function loadProfile() {
   requireLogin();
   const res = await fetch('/api/customers/me');
@@ -185,10 +186,9 @@ async function updateProfile(e) {
   alert('Profile updated');
 }
 
-// 🧠 Page router
+// Page router
 document.addEventListener('DOMContentLoaded', () => {
   const page = window.location.pathname;
-
   if (page.endsWith('index.html')) loadProducts();
   else if (page.endsWith('product-detail.html')) loadProductDetail();
   else if (page.endsWith('login.html')) document.getElementById('login-form').addEventListener('submit', handleLogin);
