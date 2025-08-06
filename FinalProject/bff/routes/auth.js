@@ -1,7 +1,5 @@
 import express from "express";
 import { loginUser } from "../services/fastapiClient.js";
-import { setSessionCookie } from "../services/cookieManager.js";
-
 const router = express.Router();
 
 router.post("/login", async (req, res, next) => {

@@ -6,3 +6,7 @@ passlib[bcrypt]
 bcrypt==3.2.0
 python-dotenv
 pymysql
+python-jose
+datetime
+python-dotenv
+python-multipart
