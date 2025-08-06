@@ -39,7 +39,17 @@ services:
       - ./db_init:/docker-entrypoint-initdb.d
     networks:
       - backend
-
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./auth-service:/app
+      - ./fastapi/models:/app/models
+    networks:
+      - backend
+    depends_on:
+      - mysql-db
 volumes:
   db-data:
 

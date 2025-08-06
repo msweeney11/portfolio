@@ -2,7 +2,7 @@ const BASE_URL = "http://fastapi:8000";
 
 
 export async function loginUser(email, password) {
-  const res = await fetch(`${BASE_URL}/customers/login`, {
+  const res = await fetch("http://auth-service:8000/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })

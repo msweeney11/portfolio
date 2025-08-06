@@ -85,30 +85,5 @@ def register_customer(
         samesite="strict",
         path="/"
     )
-    return RedirectResponse(url="/dashboard", status_code=302)
+    return RedirectResponse(url="/index.html", status_code=302)
 
-# JSON-based login request model
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-# JSON-based login endpoint
-@router.post("/login")
-def login_customer(
-    login_data: LoginRequest,
-    response: Response,
-    db: Session = Depends(get_db)
-):
-    print("Login attempt:", login_data.email)
-    customer = db.query(Customer).filter(Customer.email_address == login_data.email).first() # type: ignore
-    if not customer or not pwd_context.verify(login_data.password, customer.password):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    response.set_cookie(
-        key="customer_id",
-        value=str(customer.customer_id),
-        httponly=True,
-        secure=True,
-        samesite="strict",
-        path="/"
-    )
-    return {"message": "Logged in"}
