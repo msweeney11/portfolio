@@ -12,7 +12,11 @@ class CustomerBase(BaseModel):
 
 # For incoming customer creation requests
 class CustomerCreate(CustomerBase):
-    pass
+    email_address: EmailStr
+    password: constr(min_length=8)
+    first_name: constr(max_length=50)
+    last_name: constr(max_length=50)
+
 
 # For partial updates
 class CustomerUpdate(BaseModel):

@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
-  <script src="api.js"></script>
 </head>
 <body>
   <h2>Login</h2>
+
   <form id="loginForm">
     <input type="email" id="email" placeholder="Email" required />
     <br />
@@ -15,26 +15,54 @@
     <button type="submit">Login</button>
   </form>
 
+  <p>Don't have an account yet?</p>
+  <button id="createAccountBtn">Create Account</button>
+
   <script>
+    // 🔐 Login logic built into this page
+    async function login(email, password) {
+      try {
+        const res = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({ email, password })
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error("Login failed:", res.status, errText);
+          return { error: errText, status: res.status };
+        }
+
+        const data = await res.json();
+        return data;
+
+      } catch (err) {
+        console.error("Network error during login:", err);
+        return { error: "Network error", detail: err };
+      }
+    }
+
+    // 🧠 Submit handler
     document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
 
-      try {
-        const result = await login(email, password);
-        console.log("Login response:", result);
+      const result = await login(email, password);
+      console.log("Login response:", result);
 
-        if (result.success) {
-          alert("Login successful!");
-          // Redirect to another page if needed
-        } else {
-          alert("Login failed. Check your credentials.");
-        }
-      } catch (err) {
-        console.error("Error logging in:", err);
-        alert("An error occurred during login.");
+      if (result.message === "Logged in") {
+        alert("Login successful!");
+        window.location.replace("/dashboard");
+      } else {
+        alert("Login failed: " + (result.error || "Invalid credentials"));
       }
+    });
+
+    // 📌 Create Account button
+    document.getElementById("createAccountBtn").addEventListener("click", () => {
+      window.location.href = "/create-account.html";
     });
   </script>
 </body>
