@@ -27,11 +27,11 @@ async function main() {
   app.use(express.json());
   app.use(cookieParser());
 
-  app.use(express.static(path.join(__dirname, "frontend")));
 
   app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "frontend", "login.html"));
   });
+  app.use(express.static(path.join(__dirname, "frontend")));
 
   app.use("/api/auth", authRoutes);
   app.use("/api/products", productRoutes);

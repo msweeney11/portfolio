@@ -9,8 +9,8 @@ router.post("/login", async (req, res, next) => {
     const { email, password } = req.body;
     const result = await loginUser(email, password);
 
-    if (result.token) {
-      setSessionCookie(res, result.token);
+    if (result.message === "Logged in") {
+      // Optionally set a cookie if FastAPI sets one
       return res.status(200).json({ message: "Logged in" });
     }
 
@@ -19,5 +19,6 @@ router.post("/login", async (req, res, next) => {
     next(err);
   }
 });
+
 
 export default router;
