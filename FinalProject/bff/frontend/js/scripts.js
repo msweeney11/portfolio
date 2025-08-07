@@ -1,3 +1,5 @@
+console.log("scripts.js loaded");
+
 // Utility: Get query parameters
 function getQueryParam(param) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -47,7 +49,9 @@ async function loadProductDetail() {
 
 // Handle login
 async function login(email, password) {
+  console.log("Attaching login handler");
   try {
+    console.log("attachment successful")
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,6 +61,7 @@ async function login(email, password) {
     if (!res.ok) {
       const errText = await res.text();
       console.error("Login failed:", res.status, errText);
+      console.log("Login failed:", res.status, errText)
       return { error: errText, status: res.status };
     }
 
@@ -65,6 +70,7 @@ async function login(email, password) {
 
   } catch (err) {
     console.error("Network error during login:", err);
+    console.log("Network error during login:", err)
     return { error: "Network error", detail: err };
   }
 }
@@ -221,16 +227,65 @@ async function updateProfile(e) {
 // Page router
 document.addEventListener('DOMContentLoaded', () => {
   const page = window.location.pathname;
-  if (page.endsWith('index.html')) loadProducts();
-  else if (page.endsWith('product-detail.html')) loadProductDetail();
-  else if (page.endsWith('login.html')) document.getElementById('login-form').addEventListener('submit', handleLogin);
-  else if (page.endsWith('register.html')) document.getElementById('register-form').addEventListener('submit', handleRegister);
-  else if (page.endsWith('cart.html')) loadCart();
-  else if (page.endsWith('wishlist.html')) loadWishlist();
-  else if (page.endsWith('checkout.html')) document.getElementById('checkout-form').addEventListener('submit', handleCheckout);
-  else if (page.endsWith('orders.html')) loadOrders();
-  else if (page.endsWith('profile.html')) {
-    loadProfile();
-    document.getElementById('profile-form').addEventListener('submit', updateProfile);
+
+  // Normalize route name
+  const route = page === '/' ? 'login' : page.split('/').pop().replace('.html', '');
+
+  console.log("Detected route:", route);
+
+  switch (route) {
+    case 'index':
+      loadProducts();
+      break;
+
+    case 'product-detail':
+      loadProductDetail();
+      break;
+
+    case 'login':
+      const loginForm = document.getElementById('login-form');
+      if (loginForm) {
+        console.log("Attaching login handler");
+        loginForm.addEventListener('submit', handleLogin);
+      }
+      break;
+
+    case 'register':
+      const registerForm = document.getElementById('register-form');
+      if (registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+      }
+      break;
+
+    case 'cart':
+      loadCart();
+      break;
+
+    case 'wishlist':
+      loadWishlist();
+      break;
+
+    case 'checkout':
+      const checkoutForm = document.getElementById('checkout-form');
+      if (checkoutForm) {
+        checkoutForm.addEventListener('submit', handleCheckout);
+      }
+      break;
+
+    case 'orders':
+      loadOrders();
+      break;
+
+    case 'profile':
+      loadProfile();
+      const profileForm = document.getElementById('profile-form');
+      if (profileForm) {
+        profileForm.addEventListener('submit', updateProfile);
+      }
+      break;
+
+    default:
+      console.warn("No route matched for:", route);
   }
 });
+

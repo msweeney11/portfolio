@@ -1,4 +1,4 @@
-version: "3.9"
+# docker-compose.yml
 
 services:
   fastapi:
@@ -22,12 +22,15 @@ services:
       - "4000:4000"
     volumes:
       - ./bff:/app
+      - /app/node_modules
     networks:
       - backend
     depends_on:
       - fastapi
+      - auth-service
     environment:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+      - AUTH_URL=http://auth-service:8000
 
   mysql-db:
     image: mysql:8.0
@@ -62,7 +65,7 @@ services:
   customer-service:
     build: ./customer-service
     ports:
-      - "8003:8000"
+      - "8003:8003"
     volumes:
       - ./customer-service:/app
     networks:
