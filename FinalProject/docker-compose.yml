@@ -61,7 +61,18 @@ services:
       - mysql-db
     environment:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
-
+  admin-service:
+    build: ./admin-service
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./admin-service:/app
+    networks:
+      - backend
+    depends_on:
+      - mysql-db
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
   customer-service:
     build: ./customer-service
     ports:
@@ -74,6 +85,7 @@ services:
       - mysql-db
     environment:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+      - PYTHONPATH=/app
 
 volumes:
   db-data:

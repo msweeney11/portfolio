@@ -18,33 +18,83 @@ function requireLogin() {
   }
 }
 
-// Load all products
 async function loadProducts() {
-  const res = await fetch('/api/products');
-  const products = await res.json();
-  const container = document.getElementById('product-grid');
-  products.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      <img src="${p.image}" alt="${p.name}">
-      <h3>${p.name}</h3>
-      <p>$${p.price}</p>
-      <a href="product-detail.html?id=${p.id}">View</a>
-    `;
-    container.appendChild(card);
-  });
+  try {
+    const res = await fetch('/api/products');
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    const products = await res.json();
+    const container = document.getElementById('product-grid');
+
+    if (!container) {
+      console.warn('Product grid container not found');
+      return;
+    }
+
+    container.innerHTML = ''; // Clear existing content
+
+    if (products && products.length > 0) {
+      products.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'col mb-5';
+        card.innerHTML = `
+          <div class="card h-100">
+            <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="${p.product_name}" />
+            <div class="card-body p-4">
+              <div class="text-center">
+                <h5 class="fw-bolder">${p.product_name}</h5>
+                <p class="text-muted">${p.description || 'No description'}</p>
+                $${p.list_price}
+              </div>
+            </div>
+            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+              <div class="text-center">
+                <a class="btn btn-outline-dark mt-auto" href="product-detail.html?id=${p.product_id}">View options</a>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    } else {
+      container.innerHTML = '<div class="col-12"><p class="text-center">No products available</p></div>';
+    }
+  } catch (error) {
+    console.error('Failed to load products:', error);
+    const container = document.getElementById('product-grid');
+    if (container) {
+      container.innerHTML = '<div class="col-12"><p class="text-center text-danger">Failed to load products</p></div>';
+    }
+  }
 }
 
 // Load single product
 async function loadProductDetail() {
-  const id = getQueryParam('id');
-  const res = await fetch(`/api/products/${id}`);
-  const product = await res.json();
-  document.getElementById('product-name').textContent = product.name;
-  document.getElementById('product-price').textContent = `$${product.price}`;
-  document.getElementById('product-description').textContent = product.description;
-  document.getElementById('product-image').src = product.image;
+  try {
+    const id = getQueryParam('id');
+    if (!id) {
+      throw new Error('No product ID provided');
+    }
+
+    const res = await fetch(`/api/products/${id}`);
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const product = await res.json();
+
+    document.getElementById('product-name').textContent = product.product_name || 'Product Name';
+    document.getElementById('product-price').textContent = `$${product.list_price || '0.00'}`;
+    document.getElementById('product-description').textContent = product.description || 'No description available';
+    document.getElementById('product-image').src = 'https://dummyimage.com/600x700/dee2e6/6c757d.jpg';
+    document.getElementById('product-image').alt = product.product_name || 'Product';
+  } catch (error) {
+    console.error('Failed to load product detail:', error);
+    document.getElementById('product-name').textContent = 'Product not found';
+    document.getElementById('product-price').textContent = '$0.00';
+    document.getElementById('product-description').textContent = 'Unable to load product details.';
+  }
 }
 
 // Handle login
@@ -92,6 +142,7 @@ async function handleLogin(e) {
 }
 
 // Handle registration
+// Handle registration
 async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById("name").value;
@@ -99,18 +150,19 @@ async function handleRegister(e) {
   const password = document.getElementById("password").value;
 
   try {
-    const res = await fetch("/api/customers", {
+    const res = await fetch("/api/auth/register", {  // Changed from /api/customers
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password })
     });
 
     if (res.ok) {
-      alert("Account created!");
+      const result = await res.json();
+      alert("Account created successfully!");
       window.location.href = "/login.html";
     } else {
-      const errText = await res.text();
-      alert("Registration failed: " + errText);
+      const errData = await res.json();
+      alert("Registration failed: " + (errData.error || "Unknown error"));
     }
   } catch (err) {
     console.error("Network error during registration:", err);
