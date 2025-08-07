@@ -7,4 +7,4 @@ setup_database()
 app = FastAPI()
 
 # Include customer routes
-app.include_router(customers.router, tags=["Customers"])
+app.include_router(customers.router, prefix="/customers", tags=["Customers"])

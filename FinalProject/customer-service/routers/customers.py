@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Form, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Form, Response, Request
 from passlib.context import CryptContext
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
@@ -6,7 +6,7 @@ from sqlalchemy import select
 from schemas import CustomerCreate, CustomerUpdate, CustomerOut, CustomerAuth
 from models.customers import Customer
 from models import Customer, get_db
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 router = APIRouter(prefix="/customers")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -55,8 +55,10 @@ def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     db.commit()
 
 @router.get("/by-email", response_model=CustomerAuth)
-def get_customer_by_email(email: str, db: Session = Depends(get_db)):
-    customer = db.query(Customer).filter(Customer.email_address == email).first()
+def get_customer_by_email(email_address: EmailStr, db: Session = Depends(get_db)):
+    print(f"Raw URL: {Request.url}")
+    print(f"Parsed email_address: {email_address}")
+    customer = db.query(Customer).filter(Customer.email_address == email_address).first()
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
