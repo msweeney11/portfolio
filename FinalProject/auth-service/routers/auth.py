@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Form, Response, Cookie
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
-from models import Customer, get_db
+from models import get_db
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
-from helpers import set_session_cookie
+from helpers import set_session_cookie, fetch_customer_by_email
 from config import SECRET_KEY, ALGORITHM
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -19,27 +19,19 @@ class LoginRequest(BaseModel):
 
 # JSON-based login endpoint
 @router.post("/login")
-def login_customer(
-    login_data: LoginRequest,
-    response: Response,
-    db: Session = Depends(get_db)
-):
+def login_customer(login_data: LoginRequest, response: Response):
     print("Login attempt:", login_data.email)
-    customer = db.query(Customer).filter(Customer.email_address == login_data.email).first()  # type: ignore
+    customer = fetch_customer_by_email(login_data.email)
 
-    if not customer or not pwd_context.verify(login_data.password, customer.password):
+    if not customer or not pwd_context.verify(login_data.password, customer["password"]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-    # Create JWT token
-    token = create_access_token({"sub": customer.email_address})
-
-    # Set session cookie with JWT
+    token = create_access_token({"sub": customer["email_address"]})
     set_session_cookie(response, token)
 
-    # Optional: still set customer_id if needed for legacy reasons
     response.set_cookie(
         key="customer_id",
-        value=str(customer.customer_id),
+        value=str(customer["customer_id"]),
         httponly=True,
         secure=True,
         samesite="Strict",
@@ -47,6 +39,7 @@ def login_customer(
     )
 
     return {"message": "Logged in"}
+
 
 # Register customer
 @router.post("/register")

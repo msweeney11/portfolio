@@ -27,9 +27,18 @@ class CustomerUpdate(BaseModel):
     shipping_address_id: Optional[int] = None
     billing_address_id: Optional[int] = None
 
-# For responses (includes ID and ORM compatibility)
-class CustomerOut(CustomerBase):
+# Public-facing schema
+class CustomerOut(BaseModel):
     customer_id: int
+    email_address: str
+    first_name: str
+    last_name: str
 
-    class Config:
-        orm_mode = True
+# Internal schema used only by auth-service
+class CustomerAuth(BaseModel):
+    customer_id: int
+    email_address: str
+    password: str
+
+class Config:
+    orm_mode = True

@@ -46,40 +46,72 @@ async function loadProductDetail() {
 }
 
 // Handle login
+async function login(email, password) {
+  try {
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Login failed:", res.status, errText);
+      return { error: errText, status: res.status };
+    }
+
+    const data = await res.json();
+    return data;
+
+  } catch (err) {
+    console.error("Network error during login:", err);
+    return { error: "Network error", detail: err };
+  }
+}
+
 async function handleLogin(e) {
   e.preventDefault();
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const res = await fetch('/api/auth/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ email, password })
-  });
-  if (res.ok) {
-    window.location.href = 'index.html';
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const result = await login(email, password);
+  console.log("Login response:", result);
+
+  if (result.message === "Logged in") {
+    alert("Login successful!");
+    window.location.replace("/index.html");
   } else {
-    alert('Login failed');
+    alert("Login failed: " + (result.error || "Invalid credentials"));
   }
 }
 
 // Handle registration
 async function handleRegister(e) {
   e.preventDefault();
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-  const res = await fetch('/api/customers', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password })
-  });
-  if (res.ok) {
-    window.location.href = 'login.html';
-  } else {
-    alert('Registration failed');
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  try {
+    const res = await fetch("/api/customers", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password })
+    });
+
+    if (res.ok) {
+      alert("Account created!");
+      window.location.href = "/login.html";
+    } else {
+      const errText = await res.text();
+      alert("Registration failed: " + errText);
+    }
+  } catch (err) {
+    console.error("Network error during registration:", err);
+    alert("Registration failed: Network error");
   }
 }
+
 
 // Load cart
 async function loadCart() {

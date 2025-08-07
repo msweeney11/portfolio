@@ -10,3 +10,4 @@ python-jose
 datetime
 python-dotenv
 python-multipart
+httpx
