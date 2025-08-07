@@ -1,4 +1,4 @@
-# docker-compose.yml
+version: "3.9"
 
 services:
   fastapi:
@@ -12,6 +12,8 @@ services:
       - backend
     depends_on:
       - mysql-db
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
 
   bff:
     build: ./bff
@@ -24,6 +26,8 @@ services:
       - backend
     depends_on:
       - fastapi
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
 
   mysql-db:
     image: mysql:8.0
@@ -39,6 +43,8 @@ services:
       - ./db_init:/docker-entrypoint-initdb.d
     networks:
       - backend
+
+
   auth-service:
     build: ./auth-service
     ports:
@@ -50,10 +56,25 @@ services:
       - backend
     depends_on:
       - mysql-db
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+
+  customer-service:
+    build: ./customer-service
+    ports:
+      - "8003:8000"
+    volumes:
+      - ./customer-service:/app
+    networks:
+      - backend
+    depends_on:
+      - mysql-db
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+
 volumes:
   db-data:
 
 networks:
   backend:
     driver: bridge
-

@@ -4,8 +4,6 @@ from sqlalchemy.exc import OperationalError
 def setup_database():
     from models.database import Base, engine
     from models.customers import Customer
-    from models.addresses import Address
-    from models.orders import Order
 
     while True:
         try:

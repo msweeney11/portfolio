@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy
+pymysql  # or mysqlclient, depending on your DB driver
+python-dotenv  # if you're using env files
+passlib[bcrypt]
+bcrypt==3.2.0
+pydantic[email]
+
