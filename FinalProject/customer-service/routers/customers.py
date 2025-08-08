@@ -4,8 +4,8 @@ from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from schemas import CustomerCreate, CustomerUpdate, CustomerOut, CustomerAuth
+from models.database import get_db
 from models.customers import Customer
-from models import Customer, get_db
 from pydantic import BaseModel, EmailStr
 
 router = APIRouter(prefix="/customers")
@@ -24,6 +24,13 @@ def create_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
 @router.get("/", response_model=list[CustomerOut])
 def get_customers(db: Session = Depends(get_db)):
     return db.query(Customer).all()
+
+@router.get("/by-email", response_model=CustomerAuth)
+def get_customer_by_email(email_address: EmailStr, db: Session = Depends(get_db)):
+    customer = db.query(Customer).filter(Customer.email_address == email_address).first()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return customer
 
 # Read single customer by ID
 @router.get("/{customer_id}", response_model=CustomerOut)
@@ -54,12 +61,4 @@ def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     db.delete(customer)
     db.commit()
 
-@router.get("/by-email", response_model=CustomerAuth)
-def get_customer_by_email(email_address: EmailStr, db: Session = Depends(get_db)):
-    print(f"Raw URL: {Request.url}")
-    print(f"Parsed email_address: {email_address}")
-    customer = db.query(Customer).filter(Customer.email_address == email_address).first()
-    if not customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
-    return customer
 

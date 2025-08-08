@@ -74,6 +74,7 @@ services:
       - mysql-db
     environment:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+      - PYTHONPATH=/app
 
 volumes:
   db-data:

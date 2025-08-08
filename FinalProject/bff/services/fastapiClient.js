@@ -1,38 +1,14 @@
 const BASE_URL = "http://fastapi:8000";
 const AUTH_URL = process.env.AUTH_URL || "http://auth-service:8000";
 
-/*export async function loginUser(email, password) {
+export async function loginUser(email, password) {
   const res = await fetch("http://auth-service:8000/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password })
   });
   return await res.json();
-}*/
-export async function loginUser(email, password) {
-  console.log("Calling auth-service login with:", email);
-  try {
-    const res = await fetch(`${AUTH_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("Auth-service responded with error:", res.status, errText);
-      return { error: errText, status: res.status };
-    }
-
-    const data = await res.json();
-    console.log("Auth-service response JSON:", data);
-    return data;
-  } catch (err) {
-    console.error("Error contacting auth-service:", err);
-    return { error: "Auth-service unreachable", detail: err.message };
-  }
 }
-
 
 export async function fetchProducts(filters) {
   const query = new URLSearchParams(filters).toString();
