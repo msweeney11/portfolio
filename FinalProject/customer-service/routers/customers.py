@@ -12,13 +12,23 @@ router = APIRouter(prefix="/customers")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Create a customer
-@router.post("/", response_model=CustomerOut, status_code=status.HTTP_201_CREATED)
-def create_customer(customer: CustomerCreate, db: Session = Depends(get_db)):
-    new_customer = Customer(**customer.dict())
+@router.post("/create-user", response_model=CustomerOut, status_code=201)
+def create_customer(payload: CustomerCreate, db: Session = Depends(get_db)):
+    existing = db.query(Customer).filter(Customer.email_address == payload.email_address).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    new_customer = Customer(
+        email_address=payload.email_address,
+        password=payload.password,  # or hash here if not done in auth-service
+        first_name=payload.first_name,
+        last_name=payload.last_name
+    )
     db.add(new_customer)
     db.commit()
     db.refresh(new_customer)
     return new_customer
+
 
 # Read all customers
 @router.get("/", response_model=list[CustomerOut])

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
-from helpers import set_session_cookie, fetch_customer_by_email
+from helpers import set_session_cookie, fetch_customer_by_email, create_customer
 from config import SECRET_KEY, ALGORITHM
 
 router = APIRouter()
@@ -41,38 +41,43 @@ def login_customer(login_data: LoginRequest, response: Response):
     return {"message": "Logged in"}
 
 # Register customer
+class RegisterRequest(BaseModel):
+  email_address: str
+  password: str
+  first_name: str
+  last_name: str
+
 @router.post("/register")
-def register_customer(
-    response: Response,
-    email_address: str = Form(...),
-    password: str = Form(...),
-    first_name: str = Form(...),
-    last_name: str = Form(...),
-    db: Session = Depends(get_db)
-):
-    print("Received registration:", email_address, first_name, last_name)
-    existing_customer = db.query(Customer).filter(Customer.email_address.__eq__(email_address)).first()
+def register_customer(payload: RegisterRequest, response: Response):
+    existing_customer = fetch_customer_by_email(payload.email_address)
     if existing_customer:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
-    hashed_password = pwd_context.hash(password)
-    new_customer = Customer(
-        email_address=email_address,
-        password=hashed_password,
-        first_name=first_name,
-        last_name=last_name
-    )
-    db.add(new_customer)
-    db.commit()
-    db.refresh(new_customer)
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_password = pwd_context.hash(payload.password)
+
+    customer_data = {
+        "email_address": payload.email_address,
+        "password": hashed_password,
+        "first_name": payload.first_name,
+        "last_name": payload.last_name
+    }
+
+    try:
+        new_customer = create_customer(customer_data)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     response.set_cookie(
         key="customer_id",
-        value=str(new_customer.customer_id),
+        value=str(new_customer["customer_id"]),
         httponly=True,
         secure=True,
-        samesite="strict",
+        samesite="Strict",
         path="/"
     )
-    return RedirectResponse(url="/index.html", status_code=302)
+
+    return {"message": "Customer registered"}
+
 
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=1)):
     to_encode = data.copy()
