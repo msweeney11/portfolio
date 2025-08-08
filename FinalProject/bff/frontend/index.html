@@ -3,16 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <title>Storefront | Home</title>
+  <title>PhoneHub - Premium Phone Accessories</title>
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="css/styles.css" rel="stylesheet" />
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container px-4 px-lg-5">
-      <a class="navbar-brand" href="index.html">Start Bootstrap</a>
+      <a class="navbar-brand fw-bold text-primary" href="index.html">
+        <i class="bi bi-phone me-2"></i>PhoneHub
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
         aria-expanded="false" aria-label="Toggle navigation">
@@ -21,46 +23,208 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
           <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+              Categories
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#cases">Phone Cases</a></li>
+              <li><a class="dropdown-item" href="#chargers">Chargers & Cables</a></li>
+              <li><a class="dropdown-item" href="#headphones">Headphones & Audio</a></li>
+              <li><a class="dropdown-item" href="#mounts">Car Mounts & Stands</a></li>
+              <li><a class="dropdown-item" href="#protection">Screen Protectors</a></li>
+            </ul>
+          </li>
           <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
           <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
         </ul>
-        <form class="d-flex gap-2">
-          <a href="cart.html" class="btn btn-outline-dark">
+        <div class="d-flex gap-2">
+          <a href="cart.html" class="btn btn-outline-primary">
             <i class="bi-cart-fill me-1"></i> Cart
-            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
+            <span class="badge bg-primary text-white ms-1 rounded-pill">0</span>
           </a>
-          <a href="wishlist.html" class="btn btn-outline-dark">
+          <a href="wishlist.html" class="btn btn-outline-success">
             <i class="bi-heart-fill me-1"></i> Wishlist
-            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
+            <span class="badge bg-success text-white ms-1 rounded-pill">0</span>
           </a>
-        </form>
+        </div>
       </div>
     </div>
   </nav>
 
-  <!-- Header -->
-  <header class="bg-dark py-5">
+  <!-- Hero Section -->
+  <header class="bg-primary py-5 text-white">
     <div class="container px-4 px-lg-5 my-5">
-      <div class="text-center text-white">
-        <h1 class="display-4 fw-bolder">Shop in style</h1>
-        <p class="lead fw-normal text-white-50 mb-0">With this shop homepage template</p>
+      <div class="text-center">
+        <h1 class="display-4 fw-bolder">
+          <i class="bi bi-phone-vibrate me-3"></i>PhoneHub Store
+        </h1>
+        <p class="lead fw-normal mb-4">
+          Your one-stop destination for premium phone accessories
+        </p>
+        <p class="mb-4">
+          From protective cases to wireless chargers, find everything you need to enhance your mobile experience
+        </p>
+        <a href="#featured" class="btn btn-light btn-lg">
+          <i class="bi bi-arrow-down me-2"></i>Shop Now
+        </a>
       </div>
     </div>
   </header>
 
+  <!-- Featured Categories Section -->
+  <section class="py-5 bg-light" id="featured">
+    <div class="container px-4 px-lg-5">
+      <div class="text-center mb-5">
+        <h2 class="fw-bolder">Featured Categories</h2>
+        <p class="lead mb-0">Discover our most popular phone accessories</p>
+      </div>
+      <div class="row gx-4 gx-lg-5">
+        <div class="col-md-6 col-xl-4 mb-5">
+          <div class="card h-100 category-card">
+            <div class="card-body text-center">
+              <i class="bi bi-shield-check text-primary display-4 mb-3"></i>
+              <h4 class="fw-bolder">Protective Cases</h4>
+              <p>Premium cases for iPhone, Samsung, Google Pixel and more</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-4 mb-5">
+          <div class="card h-100 category-card">
+            <div class="card-body text-center">
+              <i class="bi bi-battery-charging text-success display-4 mb-3"></i>
+              <h4 class="fw-bolder">Chargers & Power</h4>
+              <p>Fast chargers, wireless charging pads, and power banks</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-xl-4 mb-5">
+          <div class="card h-100 category-card">
+            <div class="card-body text-center">
+              <i class="bi bi-headphones text-info display-4 mb-3"></i>
+              <h4 class="fw-bolder">Audio Accessories</h4>
+              <p>Bluetooth earbuds, headphones, and audio adapters</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Product Grid -->
   <section class="py-5">
     <div class="container px-4 px-lg-5 mt-5">
+      <div class="text-center mb-5">
+        <h2 class="fw-bolder">Latest Products</h2>
+        <p class="lead mb-0">Check out our newest phone accessories</p>
+      </div>
       <div id="product-grid" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
         <!-- Products will be injected here by scripts.js -->
+        <div class="col-12 text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading products...</span>
+          </div>
+          <p class="mt-2">Loading phone accessories...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-5 bg-light">
+    <div class="container px-4 px-lg-5">
+      <div class="row gx-4 gx-lg-5 align-items-center">
+        <div class="col-lg-6">
+          <h2 class="fw-bolder">Why Choose PhoneHub?</h2>
+          <p class="lead mb-4">We're committed to providing the best phone accessories with exceptional service.</p>
+          <div class="row gx-4">
+            <div class="col-sm-6 mb-3">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-truck text-primary me-3 fs-4"></i>
+                <div>
+                  <h6 class="mb-1">Free Shipping</h6>
+                  <small class="text-muted">On orders over $50</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-shield-check text-success me-3 fs-4"></i>
+                <div>
+                  <h6 class="mb-1">Quality Guarantee</h6>
+                  <small class="text-muted">Premium materials only</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-arrow-clockwise text-info me-3 fs-4"></i>
+                <div>
+                  <h6 class="mb-1">30-Day Returns</h6>
+                  <small class="text-muted">Hassle-free returns</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 mb-3">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-headset text-warning me-3 fs-4"></i>
+                <div>
+                  <h6 class="mb-1">24/7 Support</h6>
+                  <small class="text-muted">Expert customer service</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="text-center">
+            <i class="bi bi-phone display-1 text-primary opacity-25"></i>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="py-5 bg-dark">
-    <div class="container">
-      <p class="m-0 text-center text-white">&copy; Your Website 2025</p>
+  <footer class="py-5 bg-dark text-white">
+    <div class="container px-4 px-lg-5">
+      <div class="row gx-4 gx-lg-5">
+        <div class="col-lg-4 mb-4">
+          <h5 class="fw-bold">
+            <i class="bi bi-phone me-2"></i>PhoneHub
+          </h5>
+          <p class="mb-0">Your trusted partner for premium phone accessories since 2025.</p>
+        </div>
+        <div class="col-lg-2 col-md-4 mb-4">
+          <h6 class="fw-bold">Categories</h6>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-white-50">Phone Cases</a></li>
+            <li><a href="#" class="text-white-50">Chargers</a></li>
+            <li><a href="#" class="text-white-50">Audio</a></li>
+            <li><a href="#" class="text-white-50">Car Mounts</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-2 col-md-4 mb-4">
+          <h6 class="fw-bold">Support</h6>
+          <ul class="list-unstyled">
+            <li><a href="#" class="text-white-50">Contact Us</a></li>
+            <li><a href="#" class="text-white-50">Returns</a></li>
+            <li><a href="#" class="text-white-50">Shipping</a></li>
+            <li><a href="#" class="text-white-50">FAQ</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4 col-md-4">
+          <h6 class="fw-bold">Connect With Us</h6>
+          <div class="d-flex gap-3">
+            <a href="#" class="text-white-50 fs-4"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="text-white-50 fs-4"><i class="bi bi-twitter"></i></a>
+            <a href="#" class="text-white-50 fs-4"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="text-white-50 fs-4"><i class="bi bi-youtube"></i></a>
+          </div>
+        </div>
+      </div>
+      <hr class="my-4">
+      <p class="m-0 text-center text-white-50">&copy; 2025 PhoneHub. All rights reserved.</p>
     </div>
   </footer>
 

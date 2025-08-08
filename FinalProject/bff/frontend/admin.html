@@ -3,16 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <title>Admin Dashboard | Storefront</title>
+  <title>Admin Dashboard | PhoneHub</title>
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="css/styles.css" rel="stylesheet" />
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container px-4 px-lg-5">
-      <a class="navbar-brand" href="index.html">Start Bootstrap</a>
+      <a class="navbar-brand fw-bold" href="index.html">
+        <i class="bi bi-phone me-2"></i>PhoneHub Admin
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
         aria-expanded="false" aria-label="Toggle navigation">
@@ -20,19 +22,18 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="orders.html">Orders</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">
+            <i class="bi bi-house me-1"></i>Store Front
+          </a></li>
+          <li class="nav-item"><a class="nav-link" href="orders.html">
+            <i class="bi bi-box-seam me-1"></i>Orders
+          </a></li>
         </ul>
-        <form class="d-flex gap-2">
-          <a href="cart.html" class="btn btn-outline-dark">
-            <i class="bi-cart-fill me-1"></i> Cart
-            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
-          </a>
-          <a href="wishlist.html" class="btn btn-outline-dark">
-            <i class="bi-heart-fill me-1"></i> Wishlist
-            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
-          </a>
-        </form>
+        <div class="d-flex gap-2">
+          <span class="navbar-text">
+            <i class="bi bi-person-gear me-1"></i>Administrator
+          </span>
+        </div>
       </div>
     </div>
   </nav>
@@ -40,12 +41,21 @@
   <!-- Admin Section -->
   <section class="py-5">
     <div class="container px-4 px-lg-5">
-      <h2 class="mb-4">Admin Dashboard</h2>
+      <div class="row mb-4">
+        <div class="col">
+          <h2 class="fw-bold text-primary">
+            <i class="bi bi-gear-fill me-2"></i>Phone Accessory Management
+          </h2>
+          <p class="lead">Add and manage phone accessories in your inventory</p>
+        </div>
+      </div>
 
       <!-- Add Product Form -->
-      <div class="card mb-4">
-        <div class="card-header">
-          <h4 class="mb-0">Add New Product</h4>
+      <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="bi bi-plus-circle me-2"></i>Add New Phone Accessory
+          </h4>
         </div>
         <div class="card-body">
           <form id="createProductForm" enctype="multipart/form-data">
@@ -53,8 +63,9 @@
               <!-- Product Name -->
               <div class="col-md-6">
                 <div class="mb-3">
-                  <label for="name" class="form-label">Product Name *</label>
-                  <input type="text" class="form-control" id="name" maxlength="255" required />
+                  <label for="name" class="form-label">Accessory Name *</label>
+                  <input type="text" class="form-control" id="name" maxlength="255"
+                         placeholder="e.g., iPhone 15 Pro Silicone Case" required />
                   <div class="form-text">Max 255 characters</div>
                 </div>
               </div>
@@ -62,9 +73,10 @@
               <!-- Product Code -->
               <div class="col-md-6">
                 <div class="mb-3">
-                  <label for="productCode" class="form-label">Product Code (SKU)</label>
-                  <input type="text" class="form-control" id="productCode" maxlength="50" placeholder="Auto-generated if empty" />
-                  <div class="form-text">Unique identifier (e.g., LAPTOP001). Leave empty for auto-generation.</div>
+                  <label for="productCode" class="form-label">Product SKU</label>
+                  <input type="text" class="form-control" id="productCode" maxlength="50"
+                         placeholder="e.g., IPC-15P-BLK or leave empty for auto-generation" />
+                  <div class="form-text">Unique identifier. Leave empty for auto-generation.</div>
                 </div>
               </div>
             </div>
@@ -76,7 +88,8 @@
                   <label for="price" class="form-label">List Price *</label>
                   <div class="input-group">
                     <span class="input-group-text">$</span>
-                    <input type="number" class="form-control" id="price" step="0.01" min="0" required />
+                    <input type="number" class="form-control" id="price" step="0.01" min="0"
+                           placeholder="29.99" required />
                   </div>
                 </div>
               </div>
@@ -97,11 +110,14 @@
                 <div class="mb-3">
                   <label for="category" class="form-label">Category</label>
                   <select class="form-control" id="category">
-                    <option value="1">General</option>
-                    <option value="2">Electronics</option>
-                    <option value="3">Clothing</option>
-                    <option value="4">Books</option>
-                    <option value="5">Home & Garden</option>
+                    <option value="1">Phone Cases & Covers</option>
+                    <option value="2">Chargers & Cables</option>
+                    <option value="3">Headphones & Audio</option>
+                    <option value="4">Car Mounts & Stands</option>
+                    <option value="5">Screen Protectors</option>
+                    <option value="6">Power Banks & Batteries</option>
+                    <option value="7">Phone Grips & Rings</option>
+                    <option value="8">Camera Accessories</option>
                   </select>
                 </div>
               </div>
@@ -109,52 +125,100 @@
 
             <!-- Description -->
             <div class="mb-3">
-              <label for="description" class="form-label">Description</label>
-              <textarea class="form-control" id="description" rows="3" maxlength="1000" placeholder="Product description..."></textarea>
-              <div class="form-text">Max 1000 characters</div>
+              <label for="description" class="form-label">Product Description</label>
+              <textarea class="form-control" id="description" rows="4" maxlength="1000"
+                        placeholder="Describe the phone accessory features, compatibility, materials, etc."></textarea>
+              <div class="form-text">Max 1000 characters. Include device compatibility, features, and benefits.</div>
             </div>
 
             <!-- Image Upload -->
-            <div class="mb-3">
+            <div class="mb-4">
               <label for="image" class="form-label">Product Image</label>
               <input type="file" class="form-control" id="image" accept="image/*" />
-              <div class="form-text">Supported formats: JPG, PNG, GIF (Max 5MB)</div>
+              <div class="form-text">
+                <i class="bi bi-info-circle me-1"></i>
+                Supported formats: JPG, PNG, GIF (Max 5MB). High-quality product images recommended.
+              </div>
             </div>
 
             <!-- Submit Button -->
-            <button type="submit" class="btn btn-success w-100">
-              <i class="bi bi-plus-circle"></i> Add Product
+            <button type="submit" class="btn btn-primary btn-lg w-100">
+              <i class="bi bi-plus-circle me-2"></i>Add Phone Accessory
             </button>
           </form>
         </div>
       </div>
 
       <!-- Product List -->
-      <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h4 class="mb-0">Existing Products</h4>
+      <div class="card shadow">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+          <h4 class="mb-0 text-dark">
+            <i class="bi bi-list-ul me-2"></i>Current Phone Accessories
+          </h4>
           <button class="btn btn-outline-primary btn-sm" onclick="loadProducts()">
-            <i class="bi bi-arrow-clockwise"></i> Refresh
+            <i class="bi bi-arrow-clockwise me-1"></i>Refresh Inventory
           </button>
         </div>
         <div class="card-body">
           <ul id="productList" class="list-group list-group-flush">
-            <li class="list-group-item text-center">
-              <div class="spinner-border spinner-border-sm" role="status">
+            <li class="list-group-item text-center py-4">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
               </div>
-              Loading products...
+              <p class="mt-2 mb-0">Loading phone accessories...</p>
             </li>
           </ul>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="row mt-4">
+        <div class="col-md-3">
+          <div class="card text-center bg-primary text-white">
+            <div class="card-body">
+              <i class="bi bi-phone display-6"></i>
+              <h5 class="card-title mt-2">Cases</h5>
+              <p class="card-text">Phone Cases</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center bg-success text-white">
+            <div class="card-body">
+              <i class="bi bi-battery-charging display-6"></i>
+              <h5 class="card-title mt-2">Chargers</h5>
+              <p class="card-text">Charging Solutions</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center bg-info text-white">
+            <div class="card-body">
+              <i class="bi bi-headphones display-6"></i>
+              <h5 class="card-title mt-2">Audio</h5>
+              <p class="card-text">Audio Accessories</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card text-center bg-warning text-white">
+            <div class="card-body">
+              <i class="bi bi-shield-check display-6"></i>
+              <h5 class="card-title mt-2">Protection</h5>
+              <p class="card-text">Screen Protectors</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Footer -->
-  <footer class="py-5 bg-dark">
+  <footer class="py-4 bg-dark text-white mt-auto">
     <div class="container">
-      <p class="m-0 text-center text-white">&copy; Your Website 2025</p>
+      <p class="m-0 text-center">
+        <i class="bi bi-gear me-1"></i>&copy; 2025 PhoneHub Admin Panel - Phone Accessory Management System
+      </p>
     </div>
   </footer>
 
