@@ -11,3 +11,4 @@ datetime
 python-dotenv
 python-multipart
 httpx
+email-validator
