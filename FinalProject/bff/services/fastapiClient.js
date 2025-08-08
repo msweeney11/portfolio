@@ -1,5 +1,6 @@
 const BASE_URL = "http://fastapi:8000";
 const AUTH_URL = process.env.AUTH_URL || "http://auth-service:8000";
+const CUSTOMER_URL = process.env.CUSTOMER_URL || "http://customer-service:8003";
 
 export async function loginUser(email, password) {
   const res = await fetch("http://auth-service:8000/auth/login", {
