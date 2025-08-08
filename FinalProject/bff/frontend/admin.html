@@ -43,29 +43,111 @@
       <h2 class="mb-4">Admin Dashboard</h2>
 
       <!-- Add Product Form -->
-      <form id="createProductForm" enctype="multipart/form-data">
-        <div class="mb-3">
-          <label for="name" class="form-label">Product Name</label>
-          <input type="text" class="form-control" id="name" required />
+      <div class="card mb-4">
+        <div class="card-header">
+          <h4 class="mb-0">Add New Product</h4>
         </div>
-        <div class="mb-3">
-          <label for="price" class="form-label">Price</label>
-          <input type="number" class="form-control" id="price" required />
+        <div class="card-body">
+          <form id="createProductForm" enctype="multipart/form-data">
+            <div class="row">
+              <!-- Product Name -->
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Product Name *</label>
+                  <input type="text" class="form-control" id="name" maxlength="255" required />
+                  <div class="form-text">Max 255 characters</div>
+                </div>
+              </div>
+
+              <!-- Product Code -->
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label for="productCode" class="form-label">Product Code (SKU)</label>
+                  <input type="text" class="form-control" id="productCode" maxlength="50" placeholder="Auto-generated if empty" />
+                  <div class="form-text">Unique identifier (e.g., LAPTOP001). Leave empty for auto-generation.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Price -->
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="price" class="form-label">List Price *</label>
+                  <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="price" step="0.01" min="0" required />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Discount -->
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="discount" class="form-label">Discount Percent</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="discount" step="0.1" min="0" max="100" value="0" />
+                    <span class="input-group-text">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Category -->
+              <div class="col-md-4">
+                <div class="mb-3">
+                  <label for="category" class="form-label">Category</label>
+                  <select class="form-control" id="category">
+                    <option value="1">General</option>
+                    <option value="2">Electronics</option>
+                    <option value="3">Clothing</option>
+                    <option value="4">Books</option>
+                    <option value="5">Home & Garden</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea class="form-control" id="description" rows="3" maxlength="1000" placeholder="Product description..."></textarea>
+              <div class="form-text">Max 1000 characters</div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="mb-3">
+              <label for="image" class="form-label">Product Image</label>
+              <input type="file" class="form-control" id="image" accept="image/*" />
+              <div class="form-text">Supported formats: JPG, PNG, GIF (Max 5MB)</div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-success w-100">
+              <i class="bi bi-plus-circle"></i> Add Product
+            </button>
+          </form>
         </div>
-        <div class="mb-3">
-          <label for="description" class="form-label">Description</label>
-          <textarea class="form-control" id="description" rows="3"></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="image" class="form-label">Product Image</label>
-          <input type="file" class="form-control" id="image" accept="image/*" />
-        </div>
-        <button type="submit" class="btn btn-outline-dark w-100">Add Product</button>
-      </form>
+      </div>
 
       <!-- Product List -->
-      <h3 class="mb-3">Existing Products</h3>
-      <ul id="productList" class="list-group"></ul>
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h4 class="mb-0">Existing Products</h4>
+          <button class="btn btn-outline-primary btn-sm" onclick="loadProducts()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+        <div class="card-body">
+          <ul id="productList" class="list-group list-group-flush">
+            <li class="list-group-item text-center">
+              <div class="spinner-border spinner-border-sm" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              Loading products...
+            </li>
+          </ul>
+        </div>
+      </div>
     </div>
   </section>
 

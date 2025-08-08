@@ -23,20 +23,44 @@ async function main() {
 
   const app = express();
 
-  app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+  // Fixed CORS configuration
+  app.use(cors({
+    origin: ["http://localhost:4000", "http://localhost:3000", "http://localhost:5173"],
+    credentials: true
+  }));
+
   app.use(express.json());
   app.use(cookieParser());
 
-
-  app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "frontend", "login.html"));
-  });
+  // Serve static files first
   app.use(express.static(path.join(__dirname, "frontend")));
 
+  // Root route serves login page
+  app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "frontend", "index.html"));
+  });
+
+  // API routes
   app.use("/api/auth", authRoutes);
   app.use("/api/products", productRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/admin", adminRoutes);
+
+  // Health check
+  app.get("/health", (req, res) => {
+    res.json({ service: "bff", status: "healthy" });
+  });
+
+  // Catch-all route for SPA
+  app.get("*", (req, res) => {
+    // If it's an API route that doesn't exist, return 404
+    if (req.path.startsWith("/api/")) {
+      return res.status(404).json({ error: "API endpoint not found" });
+    }
+    // Otherwise serve the main HTML file for SPA routing
+    res.sendFile(path.join(__dirname, "frontend", "index.html"));
+  });
+
   app.use(handleError);
 
   app.listen(4000, '0.0.0.0', () => console.log("BFF running on port 4000"));

@@ -1,6 +1,26 @@
 # docker-compose.yml
+version: '3.8'
 
 services:
+  mysql-db:
+    image: mysql:8.0
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: accessory_shop
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./db_init:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
   fastapi:
     build: ./fastapi
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -11,7 +31,55 @@ services:
     networks:
       - backend
     depends_on:
-      - mysql-db
+      mysql-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+
+  customer-service:
+    build: ./customer-service
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./customer-service:/app
+    networks:
+      - backend
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+      - PYTHONPATH=/app
+
+  auth-service:
+    build: ./auth-service
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./auth-service:/app
+    networks:
+      - backend
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      customer-service:
+        condition: service_started
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+
+  admin-service:
+    build: ./admin-service
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./admin-service:/app
+    networks:
+      - backend
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      fastapi:
+        condition: service_started
     environment:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
 
@@ -28,64 +96,12 @@ services:
     depends_on:
       - fastapi
       - auth-service
+      - customer-service
+      - admin-service
     environment:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
       - AUTH_URL=http://auth-service:8000
-
-  mysql-db:
-    image: mysql:8.0
-    restart: always
-    command: --default-authentication-plugin=mysql_native_password
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpass
-      MYSQL_DATABASE: accessory_shop
-    ports:
-      - "3306:3306"
-    volumes:
-      - db-data:/var/lib/mysql
-      - ./db_init:/docker-entrypoint-initdb.d
-    networks:
-      - backend
-
-
-  auth-service:
-    build: ./auth-service
-    ports:
-      - "8002:8000"
-    volumes:
-      - ./auth-service:/app
-      - ./fastapi/models:/app/models
-    networks:
-      - backend
-    depends_on:
-      - mysql-db
-    environment:
-      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
-  admin-service:
-    build: ./admin-service
-    ports:
-      - "8001:8000"
-    volumes:
-      - ./admin-service:/app
-    networks:
-      - backend
-    depends_on:
-      - mysql-db
-    environment:
-      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
-  customer-service:
-    build: ./customer-service
-    ports:
-      - "8003:8003"
-    volumes:
-      - ./customer-service:/app
-    networks:
-      - backend
-    depends_on:
-      - mysql-db
-    environment:
-      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
-      - PYTHONPATH=/app
+      - CUSTOMER_URL=http://customer-service:8003
 
 volumes:
   db-data:
