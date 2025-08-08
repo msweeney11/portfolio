@@ -11,6 +11,30 @@ export async function loginUser(email, password) {
   return await res.json();
 }
 
+export async function registerUser(email_address, password, first_name, last_name) {
+  const formData = new URLSearchParams();
+  formData.append("email_address", email_address);
+  formData.append("password", password);
+  formData.append("first_name", first_name);
+  formData.append("last_name", last_name);
+
+  const res = await fetch("http://auth-service:8000/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: formData
+  });
+
+  // Since the endpoint redirects, you might want to handle that
+  if (res.redirected) {
+    return { success: true, redirectUrl: res.url };
+  }
+
+  return await res.json();
+}
+
+
 export async function fetchProducts(filters) {
   const query = new URLSearchParams(filters).toString();
   const res = await fetch(`${BASE_URL}/products?${query}`);

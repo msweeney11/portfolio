@@ -1,11 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import products, orders
-from setup_models import setup_database, seed_categories
 
-# Setup database and seed data
-setup_database()
-seed_categories()
 
 app = FastAPI()
 

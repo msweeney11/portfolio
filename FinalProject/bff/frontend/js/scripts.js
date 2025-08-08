@@ -142,10 +142,11 @@ async function handleLogin(e) {
 }
 
 // Handle registration
-// Handle registration
 async function handleRegister(e) {
   e.preventDefault();
-  const name = document.getElementById("name").value;
+
+  const firstName = document.getElementById("first-name").value;
+  const lastName = document.getElementById("last-name").value;
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -153,7 +154,12 @@ async function handleRegister(e) {
     const res = await fetch("http://localhost:8002/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password })
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        email_address: email,
+        password: password
+      })
     });
 
     if (res.ok) {
@@ -169,6 +175,7 @@ async function handleRegister(e) {
     alert("Registration failed: Network error");
   }
 }
+
 
 
 // Load cart
