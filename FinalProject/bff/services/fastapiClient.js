@@ -35,33 +35,89 @@ export async function registerUser(email_address, password, first_name, last_nam
 }
 
 
-export async function fetchProducts(filters) {
-  const query = new URLSearchParams(filters).toString();
-  const res = await fetch(`${BASE_URL}/products?${query}`);
-  return await res.json();
+export async function fetchProducts(filters = {}) {
+  try {
+    const query = new URLSearchParams(filters).toString();
+    const res = await fetch(`${BASE_URL}/products${query ? '?' + query : ''}`);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch products: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Fetch products error:", error);
+    throw error;
+  }
+}
+
+export async function fetchSingleProduct(productId) {
+  try {
+    const res = await fetch(`${BASE_URL}/products/${productId}`);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch product: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Fetch single product error:", error);
+    throw error;
+  }
 }
 
 export async function fetchOrderHistory(userId) {
-  const res = await fetch(`${BASE_URL}/orders/${userId}`);
-  return await res.json();
+  try {
+    const res = await fetch(`${BASE_URL}/orders?customer_id=${userId}`);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch orders: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Fetch order history error:", error);
+    throw error;
+  }
 }
 
 export async function createProduct(productData) {
-  const res = await fetch(`${BASE_URL}/admin/create`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(productData)
-  });
-  return await res.json();
+  try {
+    const res = await fetch(`${BASE_URL}/products/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(productData)
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.detail || "Failed to create product");
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Create product error:", error);
+    throw error;
+  }
 }
 
 export async function uploadImage(file) {
-  const formData = new FormData();
-  formData.append("image", file.buffer, file.originalname);
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
 
-  const res = await fetch(`${BASE_URL}/admin/upload`, {
-    method: "POST",
-    body: formData
-  });
-  return await res.json();
+    const res = await fetch("http://admin-service:8000/admin/uploads/", {
+      method: "POST",
+      body: formData
+    });
+
+    if (!res.ok) {
+      throw new Error(`Failed to upload image: ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Upload image error:", error);
+    throw error;
+  }
 }
