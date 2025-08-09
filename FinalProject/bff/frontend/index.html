@@ -6,6 +6,7 @@
   <title>PhoneHub - Premium Phone Accessories</title>
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="css/styles.css" rel="stylesheet" />
 </head>
 <body>
@@ -28,24 +29,40 @@
               Categories
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#cases">Phone Cases</a></li>
-              <li><a class="dropdown-item" href="#chargers">Chargers & Cables</a></li>
-              <li><a class="dropdown-item" href="#headphones">Headphones & Audio</a></li>
-              <li><a class="dropdown-item" href="#mounts">Car Mounts & Stands</a></li>
-              <li><a class="dropdown-item" href="#protection">Screen Protectors</a></li>
+              <li><a class="dropdown-item filter-category" href="#" data-category="1">Phone Cases</a></li>
+              <li><a class="dropdown-item filter-category" href="#" data-category="2">Chargers & Cables</a></li>
+              <li><a class="dropdown-item filter-category" href="#" data-category="3">Headphones & Audio</a></li>
+              <li><a class="dropdown-item filter-category" href="#" data-category="4">Car Mounts & Stands</a></li>
+              <li><a class="dropdown-item filter-category" href="#" data-category="5">Screen Protectors</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item filter-category" href="#" data-category="">All Products</a></li>
             </ul>
           </li>
-          <li class="nav-item"><a class="nav-link" href="register.html">Register</a></li>
-          <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
+          <li class="nav-item">
+            <a class="nav-link" href="admin.html">
+              <i class="bi bi-gear me-1"></i>Admin
+            </a>
+          </li>
         </ul>
-        <div class="d-flex gap-2">
-          <a href="cart.html" class="btn btn-outline-primary">
-            <i class="bi-cart-fill me-1"></i> Cart
-            <span class="badge bg-primary text-white ms-1 rounded-pill">0</span>
+
+        <!-- Search Bar -->
+        <div class="me-3">
+          <div class="input-group">
+            <input type="text" class="form-control" id="search-input" placeholder="Search accessories...">
+            <button class="btn btn-outline-primary" type="button" onclick="searchProducts()">
+              <i class="bi bi-search"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- User Navigation - Will be populated by JavaScript -->
+        <div class="d-flex gap-2" id="navbar-user-section">
+          <!-- Default buttons - will be replaced by JavaScript based on login status -->
+          <a href="login.html" class="btn btn-outline-primary">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Login
           </a>
-          <a href="wishlist.html" class="btn btn-outline-success">
-            <i class="bi-heart-fill me-1"></i> Wishlist
-            <span class="badge bg-success text-white ms-1 rounded-pill">0</span>
+          <a href="register.html" class="btn btn-primary">
+            <i class="bi bi-person-plus me-1"></i>Register
           </a>
         </div>
       </div>
@@ -81,7 +98,7 @@
       </div>
       <div class="row gx-4 gx-lg-5">
         <div class="col-md-6 col-xl-4 mb-5">
-          <div class="card h-100 category-card">
+          <div class="card h-100 category-card" style="cursor: pointer;" onclick="filterByCategory(1)">
             <div class="card-body text-center">
               <i class="bi bi-shield-check text-primary display-4 mb-3"></i>
               <h4 class="fw-bolder">Protective Cases</h4>
@@ -90,7 +107,7 @@
           </div>
         </div>
         <div class="col-md-6 col-xl-4 mb-5">
-          <div class="card h-100 category-card">
+          <div class="card h-100 category-card" style="cursor: pointer;" onclick="filterByCategory(2)">
             <div class="card-body text-center">
               <i class="bi bi-battery-charging text-success display-4 mb-3"></i>
               <h4 class="fw-bolder">Chargers & Power</h4>
@@ -99,7 +116,7 @@
           </div>
         </div>
         <div class="col-md-6 col-xl-4 mb-5">
-          <div class="card h-100 category-card">
+          <div class="card h-100 category-card" style="cursor: pointer;" onclick="filterByCategory(3)">
             <div class="card-body text-center">
               <i class="bi bi-headphones text-info display-4 mb-3"></i>
               <h4 class="fw-bolder">Audio Accessories</h4>
@@ -111,12 +128,43 @@
     </div>
   </section>
 
+  <!-- Filter and Sort Controls -->
+  <section class="py-3 bg-white border-bottom">
+    <div class="container px-4 px-lg-5">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <div class="d-flex gap-2 align-items-center">
+            <span class="fw-bold">Filter by Price:</span>
+            <input type="range" class="form-range" id="price-filter" min="0" max="200" value="200" style="width: 150px;">
+            <span id="price-display">$0 - $200</span>
+          </div>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <div class="d-flex gap-2 align-items-center justify-content-md-end">
+            <span class="fw-bold">Sort by:</span>
+            <select class="form-select" id="sort-select" style="width: auto;">
+              <option value="name">Name</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="newest">Newest First</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Product Grid -->
   <section class="py-5">
     <div class="container px-4 px-lg-5 mt-5">
-      <div class="text-center mb-5">
-        <h2 class="fw-bolder">Latest Products</h2>
-        <p class="lead mb-0">Check out our newest phone accessories</p>
+      <div class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+          <h2 class="fw-bolder">Latest Products</h2>
+          <p class="lead mb-0">Check out our newest phone accessories</p>
+        </div>
+        <button class="btn btn-outline-primary" onclick="loadProducts()">
+          <i class="bi bi-arrow-clockwise me-2"></i>Refresh
+        </button>
       </div>
       <div id="product-grid" class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
         <!-- Products will be injected here by scripts.js -->
@@ -185,6 +233,59 @@
     </div>
   </section>
 
+  <!-- Product Detail Modal -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="productModalLabel">Product Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <img id="modal-product-image" class="img-fluid rounded" src="" alt="Product Image">
+            </div>
+            <div class="col-md-6">
+              <h3 id="modal-product-name">Product Name</h3>
+              <div class="mb-3">
+                <span class="badge bg-secondary" id="modal-product-category">Category</span>
+                <span class="badge bg-info ms-2" id="modal-product-code">SKU</span>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-center small text-warning mb-2" id="modal-product-rating">
+                  <!-- Stars will be inserted here -->
+                </div>
+              </div>
+              <p id="modal-product-description">Product description will appear here...</p>
+              <div class="mb-4">
+                <div id="modal-product-prices">
+                  <!-- Prices will be inserted here -->
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="quantity" class="form-label">Quantity:</label>
+                <div class="input-group" style="width: 150px;">
+                  <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">-</button>
+                  <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="10">
+                  <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">+</button>
+                </div>
+              </div>
+              <div class="d-grid gap-2">
+                <button class="btn btn-primary btn-lg" onclick="addToCart()">
+                  <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                </button>
+                <button class="btn btn-outline-danger" onclick="addToWishlist()">
+                  <i class="bi bi-heart me-2"></i>Add to Wishlist
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="py-5 bg-dark text-white">
     <div class="container px-4 px-lg-5">
@@ -198,10 +299,10 @@
         <div class="col-lg-2 col-md-4 mb-4">
           <h6 class="fw-bold">Categories</h6>
           <ul class="list-unstyled">
-            <li><a href="#" class="text-white-50">Phone Cases</a></li>
-            <li><a href="#" class="text-white-50">Chargers</a></li>
-            <li><a href="#" class="text-white-50">Audio</a></li>
-            <li><a href="#" class="text-white-50">Car Mounts</a></li>
+            <li><a href="#" class="text-white-50 filter-category" data-category="1">Phone Cases</a></li>
+            <li><a href="#" class="text-white-50 filter-category" data-category="2">Chargers</a></li>
+            <li><a href="#" class="text-white-50 filter-category" data-category="3">Audio</a></li>
+            <li><a href="#" class="text-white-50 filter-category" data-category="4">Car Mounts</a></li>
           </ul>
         </div>
         <div class="col-lg-2 col-md-4 mb-4">
