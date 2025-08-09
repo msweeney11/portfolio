@@ -61,7 +61,7 @@ router.post("/register", async (req, res, next) => {
     const first_name = nameParts[0] || '';
     const last_name = nameParts.slice(1).join(' ') || '';
 
-    const authResponse = await fetch("http://auth-service:8000/auth/register", {
+const authResponse = await fetch("http://auth-service:8000/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -72,9 +72,7 @@ router.post("/register", async (req, res, next) => {
         last_name: last_name
       })
     });
-
     const result = await authResponse.json();
-
     if (authResponse.ok) {
       // Forward cookies from registration too
       const setCookieHeaders = authResponse.headers.get('set-cookie');
@@ -84,14 +82,13 @@ router.post("/register", async (req, res, next) => {
           res.append('Set-Cookie', cookie);
         });
       }
-
       res.status(201).json({ message: "Account created successfully", customer: result });
     } else {
       res.status(400).json({ error: result.error || "Registration failed" });
     }
   } catch (err) {
     console.log("Error in BFF registration route:", err);
-    next(err);
+    res.status(400).json({ error: err.message || "Registration failed" });
   }
 });
 

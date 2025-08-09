@@ -7,7 +7,7 @@ router = APIRouter()
 
 class ProductCreate(BaseModel):
     category_id: int = 1
-    product_code: str
+    product_code: str = ""  # Allow empty for auto-generation
     product_name: str
     description: Optional[str] = ""
     list_price: float
@@ -17,7 +17,7 @@ class ProductCreate(BaseModel):
 async def get_products():
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get("http://fastapi:8000/products/")
+            response = await client.get("http://products-service:8004/products/")
             if response.status_code == 200:
                 return response.json()
             else:
@@ -30,13 +30,30 @@ async def create_product(product: ProductCreate):
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                "http://fastapi:8000/products/",
+                "http://products-service:8004/products/",
                 json=product.dict()
             )
             if response.status_code == 201:
                 return response.json()
             else:
-                raise HTTPException(status_code=response.status_code, detail="Failed to create product")
+                error_detail = await response.text()
+                raise HTTPException(status_code=response.status_code, detail=f"Failed to create product: {error_detail}")
+    except httpx.RequestError:
+        raise HTTPException(status_code=500, detail="Failed to connect to product service")
+
+@router.put("/{product_id}")
+async def update_product(product_id: int, product: ProductCreate):
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.put(
+                f"http://products-service:8004/products/{product_id}",
+                json=product.dict()
+            )
+            if response.status_code == 200:
+                return response.json()
+            else:
+                error_detail = await response.text()
+                raise HTTPException(status_code=response.status_code, detail=f"Failed to update product: {error_detail}")
     except httpx.RequestError:
         raise HTTPException(status_code=500, detail="Failed to connect to product service")
 
@@ -44,10 +61,22 @@ async def create_product(product: ProductCreate):
 async def delete_product(product_id: int):
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.delete(f"http://fastapi:8000/products/{product_id}")
+            response = await client.delete(f"http://products-service:8004/products/{product_id}")
             if response.status_code == 204:
                 return {"message": "Product deleted successfully"}
             else:
                 raise HTTPException(status_code=response.status_code, detail="Failed to delete product")
+    except httpx.RequestError:
+        raise HTTPException(status_code=500, detail="Failed to connect to product service")
+
+@router.get("/categories")
+async def get_categories():
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get("http://products-service:8004/categories/")
+            if response.status_code == 200:
+                return response.json()
+            else:
+                raise HTTPException(status_code=response.status_code, detail="Failed to fetch categories")
     except httpx.RequestError:
         raise HTTPException(status_code=500, detail="Failed to connect to product service")

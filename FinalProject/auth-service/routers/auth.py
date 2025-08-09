@@ -12,16 +12,14 @@ from config import SECRET_KEY, ALGORITHM
 router = APIRouter()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# JSON-based login request model
 class LoginRequest(BaseModel):
     email: str
     password: str
 
-# JSON-based login endpoint
 @router.post("/login")
 def login_customer(login_data: LoginRequest):
     print("Login attempt:", login_data.email)
-    customer = fetch_customer_by_email(login_data.email)
+    customer = await fetch_customer_by_email(login_data.email)  # Add await
 
     if not customer or not pwd_context.verify(login_data.password, customer["password"]):
       raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
@@ -50,7 +48,6 @@ def login_customer(login_data: LoginRequest):
     return response
 
 
-# Register customer
 class RegisterRequest(BaseModel):
     email_address: str
     password: str
@@ -58,8 +55,8 @@ class RegisterRequest(BaseModel):
     last_name: str
 
 @router.post("/register")
-def register_customer(payload: RegisterRequest, response: Response):
-    existing_customer = fetch_customer_by_email(payload.email_address)
+async def register_customer(payload: RegisterRequest, response: Response):  # Make async
+    existing_customer = await fetch_customer_by_email(payload.email_address)  # Add await
     if existing_customer:
         raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -73,7 +70,7 @@ def register_customer(payload: RegisterRequest, response: Response):
     }
 
     try:
-        new_customer = create_customer(customer_data)
+        new_customer = await create_customer(customer_data)  # Add await
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -87,7 +84,6 @@ def register_customer(payload: RegisterRequest, response: Response):
     )
 
     return {"message": "Customer registered"}
-
 
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=1)):
     to_encode = data.copy()

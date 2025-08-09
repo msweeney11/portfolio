@@ -3,16 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <title>Product Detail | Storefront</title>
+  <title>Product Details | PhoneHub</title>
   <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="css/styles.css" rel="stylesheet" />
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
     <div class="container px-4 px-lg-5">
-      <a class="navbar-brand" href="index.html">Start Bootstrap</a>
+      <a class="navbar-brand fw-bold text-primary" href="index.html">
+        <i class="bi bi-phone me-2"></i>PhoneHub
+      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
         data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
         aria-expanded="false" aria-label="Toggle navigation">
@@ -20,53 +23,594 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">
+            <i class="bi bi-house me-1"></i>Home
+          </a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+              Categories
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="index.html#category=1">Phone Cases</a></li>
+              <li><a class="dropdown-item" href="index.html#category=2">Chargers & Cables</a></li>
+              <li><a class="dropdown-item" href="index.html#category=3">Headphones & Audio</a></li>
+              <li><a class="dropdown-item" href="index.html#category=4">Car Mounts & Stands</a></li>
+            </ul>
+          </li>
         </ul>
-        <form class="d-flex gap-2">
-          <a href="cart.html" class="btn btn-outline-dark">
-            <i class="bi-cart-fill me-1"></i> Cart
-            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
-          </a>
-          <a href="wishlist.html" class="btn btn-outline-dark">
-            <i class="bi-heart-fill me-1"></i> Wishlist
-            <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
-          </a>
-        </form>
+        <div class="d-flex gap-2" id="navbar-user-section">
+          <!-- Will be populated by JavaScript -->
+        </div>
       </div>
+    </div>
+  </nav>
+
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="bg-light py-2">
+    <div class="container px-4 px-lg-5">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none">Home</a></li>
+        <li class="breadcrumb-item"><a href="index.html" class="text-decoration-none" id="breadcrumb-category">Category</a></li>
+        <li class="breadcrumb-item active" aria-current="page" id="breadcrumb-product">Product</li>
+      </ol>
     </div>
   </nav>
 
   <!-- Product Detail -->
   <section class="py-5">
     <div class="container px-4 px-lg-5">
-      <div class="row gx-5">
-        <div class="col-md-6">
-          <img id="product-image" class="card-img-top mb-5 mb-md-0" src="" alt="Product Image" />
+
+      <!-- Loading State -->
+      <div id="product-loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading product...</span>
         </div>
-        <div class="col-md-6">
-          <h1 id="product-name" class="display-5 fw-bolder">Loading...</h1>
-          <div class="fs-5 mb-3">
-            <span id="product-price">$0.00</span>
+        <p class="mt-2">Loading product details...</p>
+      </div>
+
+      <!-- Product Content -->
+      <div id="product-content" style="display: none;">
+        <div class="row gx-4 gx-lg-5 align-items-center">
+
+          <!-- Product Images -->
+          <div class="col-md-6">
+            <div class="position-relative">
+              <img id="product-main-image" class="card-img-top mb-5 mb-md-0 rounded shadow"
+                   src="" alt="Product Image" style="width: 100%; height: 400px; object-fit: cover;" />
+
+              <!-- Discount Badge -->
+              <div id="discount-badge" class="position-absolute top-0 end-0 m-3" style="display: none;">
+                <span class="badge bg-danger fs-6">
+                  <i class="bi bi-percent me-1"></i><span id="discount-amount">0</span>% OFF
+                </span>
+              </div>
+
+              <!-- Image Gallery (if multiple images) -->
+              <div id="image-gallery" class="d-flex gap-2 mt-3" style="display: none !important;">
+                <!-- Thumbnail images would go here -->
+              </div>
+            </div>
           </div>
-          <p id="product-description" class="lead">Loading description...</p>
-          <div class="d-flex">
-            <button class="btn btn-outline-dark flex-shrink-0" type="button">
-              <i class="bi-cart-fill me-1"></i> Add to cart
-            </button>
+
+          <!-- Product Info -->
+          <div class="col-md-6">
+            <div class="small mb-1" id="product-category-badge">
+              <!-- Category badge -->
+            </div>
+            <h1 id="product-name" class="display-5 fw-bolder mb-3">Loading...</h1>
+
+            <!-- Rating -->
+            <div class="d-flex justify-content-start small text-warning mb-3" id="product-rating">
+              <i class="bi-star-fill"></i>
+              <i class="bi-star-fill"></i>
+              <i class="bi-star-fill"></i>
+              <i class="bi-star-fill"></i>
+              <i class="bi-star-half"></i>
+              <span class="text-muted ms-2">(4.5) • 127 reviews</span>
+            </div>
+
+            <!-- Price -->
+            <div class="mb-4" id="product-pricing">
+              <div id="regular-price" class="fs-3 fw-bold text-primary">$0.00</div>
+              <div id="discounted-pricing" style="display: none;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="fs-3 fw-bold text-primary" id="sale-price">$0.00</span>
+                  <span class="fs-5 text-muted text-decoration-line-through" id="original-price">$0.00</span>
+                </div>
+                <div class="text-success fw-bold">
+                  You save $<span id="savings-amount">0.00</span>!
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="mb-4">
+              <h5 class="fw-bold">Product Details</h5>
+              <div class="row small text-muted">
+                <div class="col-6">
+                  <strong>SKU:</strong> <span id="product-sku">-</span>
+                </div>
+                <div class="col-6">
+                  <strong>Availability:</strong> <span class="text-success">In Stock</span>
+                </div>
+                <div class="col-6">
+                  <strong>Category:</strong> <span id="product-category-name">-</span>
+                </div>
+                <div class="col-6">
+                  <strong>Date Added:</strong> <span id="product-date">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <p id="product-description" class="lead mb-4">Loading description...</p>
+
+            <!-- Quantity and Actions -->
+            <div class="mb-4">
+              <div class="row align-items-center">
+                <div class="col-md-4">
+                  <label for="quantity" class="form-label fw-bold">Quantity:</label>
+                  <div class="input-group">
+                    <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">
+                      <i class="bi bi-dash"></i>
+                    </button>
+                    <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="10">
+                    <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="col-md-8">
+                  <div class="d-grid gap-2 d-md-flex">
+                    <button class="btn btn-primary btn-lg flex-fill" type="button" onclick="addToCart()">
+                      <i class="bi-cart-plus me-2"></i>Add to Cart
+                    </button>
+                    <button class="btn btn-outline-danger btn-lg" type="button" onclick="addToWishlist()">
+                      <i class="bi-heart me-2"></i>Wishlist
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product Features -->
+            <div class="mb-4">
+              <h6 class="fw-bold">Key Features:</h6>
+              <ul class="list-unstyled" id="product-features">
+                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Premium quality materials</li>
+                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Perfect fit and finish</li>
+                <li><i class="bi bi-check-circle-fill text-success me-2"></i>Easy installation</li>
+                <li><i class="bi bi-check-circle-fill text-success me-2"></i>1-year warranty included</li>
+              </ul>
+            </div>
+
+            <!-- Shipping Info -->
+            <div class="card border-info mb-4">
+              <div class="card-body p-3">
+                <div class="row text-sm">
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-2">
+                      <i class="bi bi-truck text-info me-2"></i>
+                      <div>
+                        <strong>Free Shipping</strong><br>
+                        <small class="text-muted">On orders over $50</small>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-arrow-clockwise text-info me-2"></i>
+                      <div>
+                        <strong>30-Day Returns</strong><br>
+                        <small class="text-muted">Hassle-free returns</small>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Social Share -->
+            <div class="d-flex gap-2">
+              <span class="text-muted">Share:</span>
+              <a href="#" class="text-primary" onclick="shareProduct('facebook')">
+                <i class="bi bi-facebook"></i>
+              </a>
+              <a href="#" class="text-info" onclick="shareProduct('twitter')">
+                <i class="bi bi-twitter"></i>
+              </a>
+              <a href="#" class="text-success" onclick="shareProduct('whatsapp')">
+                <i class="bi bi-whatsapp"></i>
+              </a>
+              <a href="#" class="text-dark" onclick="shareProduct('email')">
+                <i class="bi bi-envelope"></i>
+              </a>
+            </div>
           </div>
         </div>
+
+        <!-- Product Tabs -->
+        <div class="mt-5">
+          <ul class="nav nav-tabs" id="productTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                <i class="bi bi-file-text me-2"></i>Description
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab">
+                <i class="bi bi-list-check me-2"></i>Specifications
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                <i class="bi bi-star me-2"></i>Reviews
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="shipping-tab" data-bs-toggle="tab" data-bs-target="#shipping" type="button" role="tab">
+                <i class="bi bi-truck me-2"></i>Shipping
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content" id="productTabsContent">
+            <!-- Description Tab -->
+            <div class="tab-pane fade show active" id="description" role="tabpanel">
+              <div class="py-4">
+                <div id="detailed-description">
+                  <p>This premium phone accessory is designed with the highest quality materials and attention to detail. Perfect for enhancing your mobile experience.</p>
+                  <h6>What's in the Box:</h6>
+                  <ul>
+                    <li>1x Phone Accessory</li>
+                    <li>1x Installation Guide</li>
+                    <li>1x Warranty Card</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Specifications Tab -->
+            <div class="tab-pane fade" id="specifications" role="tabpanel">
+              <div class="py-4">
+                <div class="row">
+                  <div class="col-md-6">
+                    <table class="table table-borderless">
+                      <tbody>
+                        <tr>
+                          <td class="fw-bold">Compatibility:</td>
+                          <td>Universal</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Material:</td>
+                          <td>Premium Plastic/Metal</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Color:</td>
+                          <td>Multiple Options</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Weight:</td>
+                          <td>Varies by model</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="col-md-6">
+                    <table class="table table-borderless">
+                      <tbody>
+                        <tr>
+                          <td class="fw-bold">Warranty:</td>
+                          <td>1 Year Limited</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Origin:</td>
+                          <td>Designed in USA</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Certification:</td>
+                          <td>CE, FCC</td>
+                        </tr>
+                        <tr>
+                          <td class="fw-bold">Package Size:</td>
+                          <td>Compact</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reviews Tab -->
+            <div class="tab-pane fade" id="reviews" role="tabpanel">
+              <div class="py-4">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="text-center">
+                      <div class="display-4 fw-bold text-primary">4.5</div>
+                      <div class="text-warning mb-2">
+                        <i class="bi-star-fill"></i>
+                        <i class="bi-star-fill"></i>
+                        <i class="bi-star-fill"></i>
+                        <i class="bi-star-fill"></i>
+                        <i class="bi-star-half"></i>
+                      </div>
+                      <div class="text-muted">Based on 127 reviews</div>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="mb-3">
+                      <div class="d-flex align-items-center mb-1">
+                        <span class="me-2">5</span>
+                        <i class="bi-star-fill text-warning me-2"></i>
+                        <div class="progress flex-fill me-2">
+                          <div class="progress-bar bg-warning" style="width: 75%"></div>
+                        </div>
+                        <span class="text-muted small">95</span>
+                      </div>
+                      <div class="d-flex align-items-center mb-1">
+                        <span class="me-2">4</span>
+                        <i class="bi-star-fill text-warning me-2"></i>
+                        <div class="progress flex-fill me-2">
+                          <div class="progress-bar bg-warning" style="width: 20%"></div>
+                        </div>
+                        <span class="text-muted small">25</span>
+                      </div>
+                      <div class="d-flex align-items-center mb-1">
+                        <span class="me-2">3</span>
+                        <i class="bi-star-fill text-warning me-2"></i>
+                        <div class="progress flex-fill me-2">
+                          <div class="progress-bar bg-warning" style="width: 5%"></div>
+                        </div>
+                        <span class="text-muted small">5</span>
+                      </div>
+                      <div class="d-flex align-items-center mb-1">
+                        <span class="me-2">2</span>
+                        <i class="bi-star-fill text-warning me-2"></i>
+                        <div class="progress flex-fill me-2">
+                          <div class="progress-bar bg-warning" style="width: 1%"></div>
+                        </div>
+                        <span class="text-muted small">1</span>
+                      </div>
+                      <div class="d-flex align-items-center">
+                        <span class="me-2">1</span>
+                        <i class="bi-star-fill text-warning me-2"></i>
+                        <div class="progress flex-fill me-2">
+                          <div class="progress-bar bg-warning" style="width: 1%"></div>
+                        </div>
+                        <span class="text-muted small">1</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <hr>
+
+                <!-- Sample Reviews -->
+                <div class="mb-4">
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <span class="text-white fw-bold">JD</span>
+                      </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <div class="d-flex align-items-center mb-1">
+                        <strong class="me-2">John D.</strong>
+                        <div class="text-warning small me-2">
+                          <i class="bi-star-fill"></i>
+                          <i class="bi-star-fill"></i>
+                          <i class="bi-star-fill"></i>
+                          <i class="bi-star-fill"></i>
+                          <i class="bi-star-fill"></i>
+                        </div>
+                        <small class="text-muted">2 days ago</small>
+                      </div>
+                      <p class="mb-1">Excellent product! Perfect fit and great quality. Highly recommend.</p>
+                      <small class="text-muted">Verified Purchase</small>
+                    </div>
+                  </div>
+
+                  <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                      <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <span class="text-white fw-bold">SM</span>
+                      </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                      <div class="d-flex align-items-center mb-1">
+                        <strong class="me-2">Sarah M.</strong>
+                        <div class="text-warning small me-2">
+                          <i class="bi-star-fill"></i>
+                          <i class="bi-star-fill"></i>
+                          <i class="bi-star-fill"></i>
+                          <i class="bi-star-fill"></i>
+                          <i class="bi-star"></i>
+                        </div>
+                        <small class="text-muted">1 week ago</small>
+                      </div>
+                      <p class="mb-1">Great accessory, does exactly what it's supposed to. Fast shipping too!</p>
+                      <small class="text-muted">Verified Purchase</small>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn btn-outline-primary">
+                  <i class="bi bi-plus-circle me-2"></i>Write a Review
+                </button>
+              </div>
+            </div>
+
+            <!-- Shipping Tab -->
+            <div class="tab-pane fade" id="shipping" role="tabpanel">
+              <div class="py-4">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6 class="fw-bold">Shipping Options</h6>
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                          <strong>Standard Shipping</strong><br>
+                          <small class="text-muted">3-5 business days</small>
+                        </div>
+                        <div>
+                          <strong class="text-success">FREE</strong><br>
+                          <small class="text-muted">Orders over $50</small>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                          <strong>Express Shipping</strong><br>
+                          <small class="text-muted">1-2 business days</small>
+                        </div>
+                        <div>
+                          <strong>$9.99</strong>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <div class="d-flex justify-content-between align-items-center p-3 border rounded">
+                        <div>
+                          <strong>Overnight</strong><br>
+                          <small class="text-muted">Next business day</small>
+                        </div>
+                        <div>
+                          <strong>$19.99</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6 class="fw-bold">Return Policy</h6>
+                    <ul class="list-unstyled">
+                      <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        30-day return window
+                      </li>
+                      <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Free return shipping
+                      </li>
+                      <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        Full refund or exchange
+                      </li>
+                      <li class="mb-2">
+                        <i class="bi bi-check-circle text-success me-2"></i>
+                        No restocking fees
+                      </li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4">Customer Support</h6>
+                    <p class="text-muted">
+                      Need help? Contact our customer support team 24/7 at
+                      <a href="mailto:support@phonehub.com">support@phonehub.com</a>
+                      or call <a href="tel:1-800-PHONEHUB">(800) PHONEHUB</a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Products -->
+        <div class="mt-5">
+          <h3 class="fw-bold mb-4">You Might Also Like</h3>
+          <div id="related-products" class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-xl-4">
+            <!-- Related products will be populated by JavaScript -->
+            <div class="col-12 text-center">
+              <div class="spinner-border spinner-border-sm text-primary" role="status">
+                <span class="visually-hidden">Loading related products...</span>
+              </div>
+              <p class="small mt-2">Loading suggestions...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Not Found -->
+      <div id="product-not-found" class="text-center py-5" style="display: none;">
+        <div class="mb-4">
+          <i class="bi bi-exclamation-triangle display-1 text-warning"></i>
+        </div>
+        <h3 class="fw-bold mb-3">Product Not Found</h3>
+        <p class="text-muted mb-4">
+          Sorry, the product you're looking for doesn't exist or has been removed.
+        </p>
+        <a href="index.html" class="btn btn-primary">
+          <i class="bi bi-house me-2"></i>Back to Store
+        </a>
       </div>
     </div>
   </section>
 
+  <!-- Quick Add to Cart Success Toast -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="cart-toast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="bi bi-cart-check-fill text-success me-2"></i>
+        <strong class="me-auto">Added to Cart</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        Product has been added to your cart successfully!
+      </div>
+    </div>
+  </div>
+
   <!-- Footer -->
-  <footer class="py-5 bg-dark">
-    <div class="container">
-      <p class="m-0 text-center text-white">&copy; Your Website 2025</p>
+  <footer class="py-5 bg-dark text-white">
+    <div class="container px-4 px-lg-5">
+      <div class="row gx-4 gx-lg-5">
+        <div class="col-lg-4 mb-4">
+          <h5 class="fw-bold">
+            <i class="bi bi-phone me-2"></i>PhoneHub
+          </h5>
+          <p class="mb-0">Your trusted partner for premium phone accessories since 2025.</p>
+        </div>
+        <div class="col-lg-8">
+          <div class="row">
+            <div class="col-md-4">
+              <h6 class="fw-bold">Quick Links</h6>
+              <ul class="list-unstyled">
+                <li><a href="index.html" class="text-white-50">Home</a></li>
+                <li><a href="profile.html" class="text-white-50">My Account</a></li>
+                <li><a href="orders.html" class="text-white-50">Order History</a></li>
+                <li><a href="wishlist.html" class="text-white-50">Wishlist</a></li>
+              </ul>
+            </div>
+            <div class="col-md-4">
+              <h6 class="fw-bold">Support</h6>
+              <ul class="list-unstyled">
+                <li><a href="#" class="text-white-50">Contact Us</a></li>
+                <li><a href="#" class="text-white-50">Returns</a></li>
+                <li><a href="#" class="text-white-50">Shipping Info</a></li>
+                <li><a href="#" class="text-white-50">Size Guide</a></li>
+              </ul>
+            </div>
+            <div class="col-md-4">
+              <h6 class="fw-bold">Connect</h6>
+              <div class="d-flex gap-3">
+                <a href="#" class="text-white-50 fs-4"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="text-white-50 fs-4"><i class="bi bi-twitter"></i></a>
+                <a href="#" class="text-white-50 fs-4"><i class="bi bi-instagram"></i></a>
+                <a href="#" class="text-white-50 fs-4"><i class="bi bi-youtube"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <hr class="my-4">
+      <p class="m-0 text-center text-white-50">&copy; 2025 PhoneHub. All rights reserved.</p>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/scripts.js"></script>
+  <script src="js/product-detail.js"></script>
 </body>
 </html>

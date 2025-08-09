@@ -31,6 +31,30 @@ export async function registerUser(userData) {
   return await res.json();
 }
 
+// This function is now less important since we handle verification directly in BFF
+export async function verifyLogin(cookie) {
+  try {
+    const res = await fetch(`${AUTH_URL}/auth/verify`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(cookie ? { Cookie: cookie } : {})
+      },
+      credentials: "include" // Add this
+    });
+
+    if (!res.ok) {
+      return { loggedIn: false, status: res.status };
+    }
+
+    const data = await res.json();
+    return { loggedIn: true, user: data };
+  } catch (error) {
+    console.error("Verify login error:", error);
+    return { loggedIn: false, error };
+  }
+}
+
 export async function fetchProducts(filters = {}) {
   try {
     const query = new URLSearchParams(filters).toString();
@@ -93,59 +117,12 @@ export async function createProduct(productData) {
     });
 
     if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.detail || "Failed to create product");
+      throw new Error(`Failed to create product: ${res.status}`);
     }
 
     return await res.json();
   } catch (error) {
     console.error("Create product error:", error);
     throw error;
-  }
-}
-
-export async function uploadImage(file) {
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch("http://admin-service:8000/admin/uploads/", {
-      method: "POST",
-      credentials: "include",
-      body: formData
-    });
-
-    if (!res.ok) {
-      throw new Error(`Failed to upload image: ${res.status}`);
-    }
-
-    return await res.json();
-  } catch (error) {
-    console.error("Upload image error:", error);
-    throw error;
-  }
-}
-
-// This function is now less important since we handle verification directly in BFF
-export async function verifyLogin(cookie) {
-  try {
-    const res = await fetch(`${AUTH_URL}/auth/verify`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(cookie ? { Cookie: cookie } : {})
-      },
-      credentials: "include" // Add this
-    });
-
-    if (!res.ok) {
-      return { loggedIn: false, status: res.status };
-    }
-
-    const data = await res.json();
-    return { loggedIn: true, user: data };
-  } catch (error) {
-    console.error("Verify login error:", error);
-    return { loggedIn: false, error };
   }
 }

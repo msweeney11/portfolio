@@ -98,6 +98,40 @@ services:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
       - PYTHONPATH=/app
 
+  order-service:
+    build: ./order-service
+    ports:
+      - "8007:8007"  
+    volumes:
+      - ./order-service:/app
+    networks:
+      - backend
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+      customer-service:
+        condition: service_started
+      products-service:
+        condition: service_started
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+      - PYTHONPATH=/app
+
+  products-service:
+    build: ./products-service
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./products-service:/app
+    networks:
+      - backend
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+      - PYTHONPATH=/app
+
   bff:
     build: ./bff
     command: ["npm", "start"]

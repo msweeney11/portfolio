@@ -1,260 +1,203 @@
-// Admin functionality for product management
+const ADMIN_API = '/api/admin';
 
-// Generate a short product code (max 10 characters)
-function generateProductCode() {
-  const prefix = 'P';
-  const timestamp = Date.now().toString().slice(-8); // Last 8 digits of timestamp
-  return prefix + timestamp; // e.g., P12345678 (9 characters)
-}
-
-// Load existing products
-async function loadProducts() {
-  try {
-    const response = await fetch('/api/admin/products');
-    const products = await response.json();
-    const productList = document.getElementById('productList');
-
-    productList.innerHTML = '';
-
-    if (products && products.length > 0) {
-      products.forEach(product => {
-        const listItem = document.createElement('li');
-        listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
-        listItem.innerHTML = `
-          <div>
-            <h6 class="mb-1">${product.product_name}</h6>
-            <p class="mb-1">Code: ${product.product_code} | Price: $${product.list_price}</p>
-            <small class="text-muted">${product.description || 'No description'}</small>
-          </div>
-          <div>
-            <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${product.product_id})">
-              Delete
-            </button>
-          </div>
-        `;
-        productList.appendChild(listItem);
-      });
-    } else {
-      productList.innerHTML = '<li class="list-group-item">No products found</li>';
-    }
-  } catch (error) {
-    console.error('Failed to load products:', error);
-    document.getElementById('productList').innerHTML =
-      '<li class="list-group-item text-danger">Error loading products</li>';
-  }
-}
-
-// Create new product with validation
-async function createProduct(event) {
-  event.preventDefault();
-
-  const submitBtn = event.target.querySelector('button[type="submit"]');
-  const originalText = submitBtn.textContent;
-
-  // Show loading state
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-2"></i>Creating...';
-
-  try {
-    const name = document.getElementById('name').value.trim();
-    const price = document.getElementById('price').value;
-    const description = document.getElementById('description').value.trim();
-    const productCode = document.getElementById('productCode').value.trim();
-    const discount = document.getElementById('discount').value || 0;
-    const category = document.getElementById('category').value || 1;
-
-    // Validation
-    if (!name) {
-      showMessage('Product name is required', 'warning');
-      return;
-    }
-
-    if (!price || parseFloat(price) <= 0) {
-      showMessage('Please enter a valid price', 'warning');
-      return;
-    }
-
-    // Generate product code if not provided
-    const finalProductCode = productCode || generateProductCode();
-
-    // Limit lengths
-    const productName = name.length > 255 ? name.substring(0, 255) : name;
-    const productDescription = description.length > 1000 ? description.substring(0, 1000) : description;
-
-    const productData = {
-      product_name: productName,
-      product_code: finalProductCode,
-      list_price: parseFloat(price),
-      description: productDescription,
-      category_id: parseInt(category),
-      discount_percent: parseFloat(discount)
-    };
-
-    console.log('Creating product with data:', productData);
-
-    const response = await fetch('/api/admin/products/', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(productData)
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      console.log('Product created successfully:', result);
-
-      // Show success message
-      showMessage('Product created successfully!', 'success');
-
-      // Reset form
-      document.getElementById('createProductForm').reset();
-
-      // Reload products list
-      loadProducts();
-    } else {
-      const errorText = await response.text();
-      console.error('Server error:', errorText);
-
-      let errorMessage = 'Failed to create product';
-      try {
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.detail || errorMessage;
-      } catch (e) {
-        errorMessage = `Server error: ${response.status}`;
-      }
-
-      showMessage(errorMessage, 'danger');
-    }
-  } catch (error) {
-    console.error('Error creating product:', error);
-    showMessage('Network error: ' + error.message, 'danger');
-  } finally {
-    // Reset button
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = originalText;
-  }
-}
-
-// Delete product with confirmation
-async function deleteProduct(productId) {
-  if (!confirm('Are you sure you want to delete this product?')) {
-    return;
-  }
-
-  try {
-    const response = await fetch(`/api/admin/products/${productId}`, {
-      method: 'DELETE'
-    });
-
-    if (response.ok) {
-      showMessage('Product deleted successfully!', 'success');
-      loadProducts();
-    } else {
-      const errorText = await response.text();
-      console.error('Delete error:', errorText);
-
-      let errorMessage = 'Failed to delete product';
-      try {
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.detail || errorMessage;
-      } catch (e) {
-        errorMessage = `Server error: ${response.status}`;
-      }
-
-      showMessage(errorMessage, 'danger');
-    }
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    showMessage('Network error: ' + error.message, 'danger');
-  }
-}
-
-// Show message function (same as in scripts.js)
-function showMessage(message, type = 'info') {
-  const toast = document.createElement('div');
-  toast.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-  toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-  toast.innerHTML = `
-    ${message}
-    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-  `;
-  document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 5000);
-}
-
-// File upload handling (for future use)
-async function handleFileUpload(file) {
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch('/api/admin/uploads/', {
-      method: 'POST',
-      body: formData
-    });
-
-    if (response.ok) {
-      const result = await response.json();
-      return result.url;
-    } else {
-      throw new Error('Upload failed');
-    }
-  } catch (error) {
-    console.error('Upload error:', error);
-    throw error;
-  }
-}
-
-// Initialize admin page
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Admin page loaded');
-
-  // Load existing products
-  loadProducts();
-
-  // Attach form handler
-  const form = document.getElementById('createProductForm');
-  if (form) {
-    form.addEventListener('submit', createProduct);
-  }
-
-  // Add input validation
-  const priceInput = document.getElementById('price');
-  if (priceInput) {
-    priceInput.addEventListener('input', function() {
-      const value = parseFloat(this.value);
-      if (isNaN(value) || value < 0) {
-        this.setCustomValidity('Please enter a valid positive number');
-      } else {
-        this.setCustomValidity('');
-      }
-    });
-  }
-
-  // Add character limit indicators
-  const nameInput = document.getElementById('name');
-  const descInput = document.getElementById('description');
-
-  if (nameInput) {
-    nameInput.addEventListener('input', function() {
-      if (this.value.length > 255) {
-        this.value = this.value.substring(0, 255);
-      }
-    });
-  }
-
-  if (descInput) {
-    descInput.addEventListener('input', function() {
-      if (this.value.length > 1000) {
-        this.value = this.value.substring(0, 1000);
-      }
-    });
-  }
+    loadProducts();
+    loadCategories();
+    initializeProductForm();
 });
 
-// Make deleteProduct available globally
-window.deleteProduct = deleteProduct;
+async function loadProducts() {
+    try {
+        const response = await fetch(`${ADMIN_API}/products`);
+        if (response.ok) {
+            const products = await response.json();
+            displayProducts(products);
+        } else {
+            console.error('Failed to load products');
+            showError('Failed to load products');
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+        showError('Error loading products');
+    }
+}
+
+async function loadCategories() {
+    try {
+        const response = await fetch('/api/products/categories');
+        if (response.ok) {
+            const categories = await response.json();
+            populateCategoryDropdown(categories);
+        }
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+function populateCategoryDropdown(categories) {
+    const categorySelect = document.getElementById('category');
+    if (!categorySelect) return;
+
+    categorySelect.innerHTML = categories.map(cat =>
+        `<option value="${cat.category_id}">${cat.category_name}</option>`
+    ).join('');
+}
+
+function displayProducts(products) {
+    const productList = document.getElementById('productList');
+    if (!productList) return;
+
+    if (products.length === 0) {
+        productList.innerHTML = `
+            <li class="list-group-item text-center py-4">
+                <i class="bi bi-phone display-4 text-muted mb-3"></i>
+                <p class="mb-0">No phone accessories found</p>
+                <p class="text-muted">Add your first product using the form above</p>
+            </li>
+        `;
+        return;
+    }
+
+    productList.innerHTML = products.map(product => `
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+                <div class="fw-bold text-primary">
+                    <i class="bi bi-phone me-2"></i>${product.product_name}
+                </div>
+                <p class="mb-1 text-muted">${product.description || 'No description'}</p>
+                <div class="d-flex gap-3 small text-muted">
+                    <span><i class="bi bi-tag me-1"></i>SKU: ${product.product_code}</span>
+                    <span><i class="bi bi-currency-dollar me-1"></i>$${product.list_price}</span>
+                    ${product.discount_percent > 0 ?
+                        `<span class="text-success"><i class="bi bi-percent me-1"></i>${product.discount_percent}% off</span>` :
+                        ''
+                    }
+                    <span><i class="bi bi-folder me-1"></i>${product.category ? product.category.category_name : 'Unknown'}</span>
+                </div>
+            </div>
+            <div class="btn-group" role="group">
+                <button class="btn btn-outline-primary btn-sm" onclick="editProduct(${product.product_id})">
+                    <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${product.product_id})">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+        </li>
+    `).join('');
+}
+
+function initializeProductForm() {
+    const form = document.getElementById('createProductForm');
+    if (!form) return;
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const productData = {
+            category_id: parseInt(document.getElementById('category').value),
+            product_code: document.getElementById('productCode').value.trim() || "",
+            product_name: document.getElementById('name').value,
+            description: document.getElementById('description').value,
+            list_price: parseFloat(document.getElementById('price').value),
+            discount_percent: parseFloat(document.getElementById('discount').value) || 0.0
+        };
+
+        try {
+            // Handle image upload if present
+            const imageFile = document.getElementById('image').files[0];
+            if (imageFile) {
+                const imageData = new FormData();
+                imageData.append('file', imageFile);
+
+                const uploadResponse = await fetch(`${ADMIN_API}/uploads`, {
+                    method: 'POST',
+                    body: imageData
+                });
+
+                if (uploadResponse.ok) {
+                    const uploadResult = await uploadResponse.json();
+                    productData.image_url = uploadResult.url;
+                }
+            }
+
+            // Create product
+            const response = await fetch(`${ADMIN_API}/products`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                showSuccess('Phone accessory added successfully!');
+                form.reset();
+                loadProducts(); // Reload the product list
+            } else {
+                const error = await response.json();
+                throw new Error(error.detail || 'Failed to create product');
+            }
+        } catch (error) {
+            console.error('Error creating product:', error);
+            showError('Failed to add product: ' + error.message);
+        }
+    });
+}
+
+async function editProduct(productId) {
+    // Implementation for editing products
+    showNotification('Edit functionality coming soon', 'info');
+}
+
+async function deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${ADMIN_API}/products/${productId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            showSuccess('Product deleted successfully');
+            loadProducts();
+        } else {
+            throw new Error('Failed to delete product');
+        }
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        showError('Failed to delete product');
+    }
+}
+
+function showSuccess(message) {
+    showNotification(message, 'success');
+}
+
+function showError(message) {
+    showNotification(message, 'error');
+}
+
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+
+    document.body.appendChild(notification);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    }, 5000);
+}

@@ -50,7 +50,18 @@ async function main() {
 
   // Health check
   app.get("/health", (req, res) => {
-    res.json({ service: "bff", status: "healthy" });
+    res.json({
+      service: "bff",
+      status: "healthy",
+      services: {
+        auth: process.env.AUTH_URL || "http://auth-service:8000",
+        customer: process.env.CUSTOMER_URL || "http://customer-service:8003",
+        products: process.env.PRODUCTS_URL || "http://products-service:8004",
+        orders: process.env.ORDER_URL || "http://order-service:8004",
+        cart: process.env.CART_URL || "http://cart-service:8005",
+        notifications: process.env.NOTIFICATION_URL || "http://notification-service:8006"
+      }
+    });
   });
 
   // Catch-all route for SPA
@@ -65,7 +76,14 @@ async function main() {
 
   app.use(handleError);
 
-  app.listen(4000, '0.0.0.0', () => console.log("BFF running on port 4000"));
+  app.listen(4000, '0.0.0.0', () => {
+    console.log("BFF running on port 4000");
+    console.log("Available services:");
+    console.log("- Auth Service:", process.env.AUTH_URL || "http://auth-service:8000");
+    console.log("- Customer Service:", process.env.CUSTOMER_URL || "http://customer-service:8003");
+    console.log("- Products Service:", process.env.PRODUCTS_URL || "http://products-service:8004");
+    console.log("- Order Service:", process.env.ORDER_URL || "http://order-service:8004");
+  });
 }
 
 main();
