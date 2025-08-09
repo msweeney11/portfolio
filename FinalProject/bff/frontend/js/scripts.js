@@ -1,350 +1,350 @@
-console.log("scripts.js loaded");
+const API_BASE = '/api';
 
-// Utility: Get query parameters
-function getQueryParam(param) {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(param);
-}
+// Global state
+let currentUser = null;
+let cart = { items: [], total: 0 };
 
-// Utility: Check if user is logged in
-function isLoggedIn() {
-  return document.cookie.includes('session=');
-}
-
-// Utility: Redirect if not logged in
-function requireLogin() {
-  if (!isLoggedIn()) {
-    window.location.href = 'login.html';
-  }
-}
-
-async function loadProducts() {
-  try {
-    const res = await fetch('/api/products');
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
-    }
-    const products = await res.json();
-    const container = document.getElementById('product-grid');
-
-    if (!container) {
-      console.warn('Product grid container not found');
-      return;
-    }
-
-    container.innerHTML = ''; // Clear existing content
-
-    if (products && products.length > 0) {
-      products.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'col mb-5';
-        card.innerHTML = `
-          <div class="card h-100">
-            <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="${p.product_name}" />
-            <div class="card-body p-4">
-              <div class="text-center">
-                <h5 class="fw-bolder">${p.product_name}</h5>
-                <p class="text-muted">${p.description || 'No description'}</p>
-                $${p.list_price}
-              </div>
-            </div>
-            <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-              <div class="text-center">
-                <a class="btn btn-outline-dark mt-auto" href="product-detail.html?id=${p.product_id}">View options</a>
-              </div>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    } else {
-      container.innerHTML = '<div class="col-12"><p class="text-center">No products available</p></div>';
-    }
-  } catch (error) {
-    console.error('Failed to load products:', error);
-    const container = document.getElementById('product-grid');
-    if (container) {
-      container.innerHTML = '<div class="col-12"><p class="text-center text-danger">Failed to load products</p></div>';
-    }
-  }
-}
-
-// Load single product
-async function loadProductDetail() {
-  try {
-    const id = getQueryParam('id');
-    if (!id) {
-      throw new Error('No product ID provided');
-    }
-
-    const res = await fetch(`/api/products/${id}`);
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
-    }
-
-    const product = await res.json();
-
-    document.getElementById('product-name').textContent = product.product_name || 'Product Name';
-    document.getElementById('product-price').textContent = `$${product.list_price || '0.00'}`;
-    document.getElementById('product-description').textContent = product.description || 'No description available';
-    document.getElementById('product-image').src = 'https://dummyimage.com/600x700/dee2e6/6c757d.jpg';
-    document.getElementById('product-image').alt = product.product_name || 'Product';
-  } catch (error) {
-    console.error('Failed to load product detail:', error);
-    document.getElementById('product-name').textContent = 'Product not found';
-    document.getElementById('product-price').textContent = '$0.00';
-    document.getElementById('product-description').textContent = 'Unable to load product details.';
-  }
-}
-
-// Handle login
-async function login(email, password) {
-  console.log("Attaching login handler");
-  try {
-    console.log("attachment successful")
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("Login failed:", res.status, errText);
-      console.log("Login failed:", res.status, errText)
-      return { error: errText, status: res.status };
-    }
-
-    const data = await res.json();
-    return data;
-
-  } catch (err) {
-    console.error("Network error during login:", err);
-    console.log("Network error during login:", err)
-    return { error: "Network error", detail: err };
-  }
-}
-
-async function handleLogin(e) {
-  e.preventDefault();
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const result = await login(email, password);
-  console.log("Login response:", result);
-
-  if (result.message === "Logged in") {
-    alert("Login successful!");
-    window.location.replace("/index.html");
-  } else {
-    alert("Login failed: " + (result.error || "Invalid credentials"));
-  }
-}
-
-// Handle registration
-async function handleRegister(e) {
-  e.preventDefault();
-
-  const firstName = document.getElementById("first-name").value;
-  const lastName = document.getElementById("last-name").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  try {
-    const res = await fetch("http://localhost:8002/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        first_name: firstName,
-        last_name: lastName,
-        email_address: email,
-        password: password
-      })
-    });
-
-    if (res.ok) {
-      const result = await res.json();
-      alert("Account created successfully!");
-      window.location.href = "/login.html";
-    } else {
-      const errData = await res.json();
-      alert("Registration failed: " + (errData.error || "Unknown error"));
-    }
-  } catch (err) {
-    console.error("Network error during registration:", err);
-    alert("Registration failed: Network error");
-  }
-}
-
-
-
-// Load cart
-async function loadCart() {
-  requireLogin();
-  const res = await fetch('/api/cart');
-  const cart = await res.json();
-  const container = document.getElementById('cart-items');
-  cart.forEach(item => {
-    const row = document.createElement('div');
-    row.className = 'cart-row';
-    row.innerHTML = `
-      <span>${item.product.name}</span>
-      <input type="number" value="${item.quantity}" data-id="${item.id}">
-      <button onclick="removeFromCart(${item.id})">Remove</button>
-    `;
-    container.appendChild(row);
-  });
-}
-
-// Remove item from cart
-async function removeFromCart(id) {
-  await fetch(`/api/cart/${id}`, { method: 'DELETE' });
-  location.reload();
-}
-
-// Load wishlist
-async function loadWishlist() {
-  requireLogin();
-  const res = await fetch('/api/wishlist');
-  const wishlist = await res.json();
-  const container = document.getElementById('wishlist-items');
-  wishlist.forEach(item => {
-    const card = document.createElement('div');
-    card.className = 'wishlist-card';
-    card.innerHTML = `
-      <img src="${item.product.image}" alt="${item.product.name}">
-      <h3>${item.product.name}</h3>
-      <button onclick="removeFromWishlist(${item.id})">Remove</button>
-    `;
-    container.appendChild(card);
-  });
-}
-
-// Remove item from wishlist
-async function removeFromWishlist(id) {
-  await fetch(`/api/wishlist/${id}`, { method: 'DELETE' });
-  location.reload();
-}
-
-// Submit order
-async function handleCheckout(e) {
-  e.preventDefault();
-  requireLogin();
-  const address = document.getElementById('address').value;
-  const payment = document.getElementById('payment').value;
-  const res = await fetch('/api/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ address, payment })
-  });
-  if (res.ok) {
-    window.location.href = 'orders.html';
-  } else {
-    alert('Checkout failed');
-  }
-}
-
-// Load past orders
-async function loadOrders() {
-  requireLogin();
-  const res = await fetch('/api/orders');
-  const orders = await res.json();
-  const container = document.getElementById('order-list');
-  orders.forEach(order => {
-    const div = document.createElement('div');
-    div.className = 'order-card';
-    div.innerHTML = `
-      <h4>Order #${order.id}</h4>
-      <p>Status: ${order.status}</p>
-      <p>Date: ${new Date(order.created_at).toLocaleDateString()}</p>
-    `;
-    container.appendChild(div);
-  });
-}
-
-// Load and update profile
-async function loadProfile() {
-  requireLogin();
-  const res = await fetch('/api/customers/me');
-  const user = await res.json();
-  document.getElementById('name').value = user.name;
-  document.getElementById('email').value = user.email;
-}
-
-async function updateProfile(e) {
-  e.preventDefault();
-  const name = document.getElementById('name').value;
-  const email = document.getElementById('email').value;
-  await fetch('/api/customers/me', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email })
-  });
-  alert('Profile updated');
-}
-
-// Page router
-document.addEventListener('DOMContentLoaded', () => {
-  const page = window.location.pathname;
-
-  // Normalize route name
-  const route = page === '/' ? 'login' : page.split('/').pop().replace('.html', '');
-
-  console.log("Detected route:", route);
-
-  switch (route) {
-    case 'index':
-      loadProducts();
-      break;
-
-    case 'product-detail':
-      loadProductDetail();
-      break;
-
-    case 'login':
-      const loginForm = document.getElementById('login-form');
-      if (loginForm) {
-        console.log("Attaching login handler");
-        loginForm.addEventListener('submit', handleLogin);
-      }
-      break;
-
-    case 'register':
-      const registerForm = document.getElementById('register-form');
-      if (registerForm) {
-        registerForm.addEventListener('submit', handleRegister);
-      }
-      break;
-
-    case 'cart':
-      loadCart();
-      break;
-
-    case 'wishlist':
-      loadWishlist();
-      break;
-
-    case 'checkout':
-      const checkoutForm = document.getElementById('checkout-form');
-      if (checkoutForm) {
-        checkoutForm.addEventListener('submit', handleCheckout);
-      }
-      break;
-
-    case 'orders':
-      loadOrders();
-      break;
-
-    case 'profile':
-      loadProfile();
-      const profileForm = document.getElementById('profile-form');
-      if (profileForm) {
-        profileForm.addEventListener('submit', updateProfile);
-      }
-      break;
-
-    default:
-      console.warn("No route matched for:", route);
-  }
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    initializePage();
+    loadProducts();
+    updateCartDisplay();
 });
 
+async function initializePage() {
+    // Check if user is logged in
+    try {
+        const response = await fetch('/api/auth/verify', {
+            credentials: 'include'
+        });
+        if (response.ok) {
+            currentUser = await response.json();
+            updateNavigation();
+            loadUserCart();
+        }
+    } catch (error) {
+        console.log('User not logged in');
+    }
+}
+
+function updateNavigation() {
+    const navUserSection = document.getElementById('navbar-user-section');
+    if (navUserSection) {
+        if (currentUser) {
+            navUserSection.innerHTML = `
+                <span class="navbar-text me-2">Hello, ${currentUser.email}</span>
+                <a href="profile.html" class="btn btn-outline-primary btn-sm me-2">
+                    <i class="bi bi-person me-1"></i>Profile
+                </a>
+                <button class="btn btn-outline-danger btn-sm" onclick="logout()">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            `;
+        } else {
+            navUserSection.innerHTML = `
+                <a href="login.html" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                </a>
+                <a href="register.html" class="btn btn-primary">
+                    <i class="bi bi-person-plus me-1"></i>Register
+                </a>
+            `;
+        }
+    }
+}
+
+// Product functions
+async function loadProducts(filters = {}) {
+    try {
+        const queryParams = new URLSearchParams(filters).toString();
+        const response = await fetch(`${API_BASE}/products${queryParams ? '?' + queryParams : ''}`);
+
+        if (response.ok) {
+            const products = await response.json();
+            displayProducts(products);
+        } else {
+            console.error('Failed to load products');
+        }
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
+}
+
+function displayProducts(products) {
+    const productGrid = document.getElementById('product-grid');
+    if (!productGrid) return;
+
+    productGrid.innerHTML = products.map(product => `
+        <div class="col mb-5">
+            <div class="card h-100">
+                <img class="card-img-top" src="https://via.placeholder.com/300x200?text=${encodeURIComponent(product.product_name)}" alt="${product.product_name}" />
+                <div class="card-body p-4">
+                    <div class="text-center">
+                        <h5 class="fw-bolder">${product.product_name}</h5>
+                        <div class="d-flex justify-content-center small text-warning mb-2">
+                            ${generateStarRating(4)}
+                        </div>
+                        <p class="text-muted small">${product.description || 'Premium phone accessory'}</p>
+                        ${product.discount_percent > 0 ?
+                            `<span class="text-muted text-decoration-line-through">$${product.list_price}</span>
+                             $${(product.list_price * (1 - product.discount_percent / 100)).toFixed(2)}` :
+                            `$${product.list_price}`
+                        }
+                    </div>
+                </div>
+                <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                    <div class="text-center">
+                        <button class="btn btn-outline-dark mt-auto" onclick="addToCart(${product.product_id}, '${product.product_name}', ${product.list_price})">
+                            <i class="bi-cart-plus me-1"></i>Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function generateStarRating(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+        if (i <= rating) {
+            stars += '<i class="bi-star-fill"></i>';
+        } else {
+            stars += '<i class="bi-star"></i>';
+        }
+    }
+    return stars;
+}
+
+
+// Auth functions
+async function login(email, password) {
+    try {
+        const response = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ email, password })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            showNotification('Login successful!', 'success');
+            window.location.href = 'index.html';
+        } else {
+            throw new Error('Invalid credentials');
+        }
+    } catch (error) {
+        console.error('Login error:', error);
+        showNotification('Login failed. Please check your credentials.', 'error');
+    }
+}
+
+async function register(name, email, password) {
+    try {
+        const response = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ name, email, password })
+        });
+
+        if (response.ok) {
+            showNotification('Registration successful!', 'success');
+            // Send welcome email
+            const result = await response.json();
+            if (result.customer && result.customer.customer_id) {
+                await sendWelcomeEmail(result.customer.customer_id);
+            }
+            window.location.href = 'login.html';
+        } else {
+            const error = await response.json();
+            throw new Error(error.error || 'Registration failed');
+        }
+    } catch (error) {
+        console.error('Registration error:', error);
+        showNotification('Registration failed. Please try again.', 'error');
+    }
+}
+
+async function logout() {
+    currentUser = null;
+    cart = { items: [], total: 0 };
+
+    // Clear cookies by setting them to expire
+    document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'customer_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+
+    updateNavigation();
+    updateCartDisplay();
+    showNotification('Logged out successfully', 'success');
+    window.location.href = 'index.html';
+}
+
+// Order functions
+async function createOrder(orderData) {
+    try {
+        const response = await fetch(`${API_BASE}/orders/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(orderData)
+        });
+
+        if (response.ok) {
+            const order = await response.json();
+
+            // Send order confirmation email
+            await sendOrderConfirmation({
+                customer_id: order.customer_id,
+                order_id: order.order_id,
+                order_total: order.final_amount || orderData.total_amount
+            });
+
+            // Clear cart after successful order
+            await clearCart();
+
+            showNotification('Order placed successfully!', 'success');
+            return order;
+        } else {
+            throw new Error('Failed to create order');
+        }
+    } catch (error) {
+        console.error('Error creating order:', error);
+        showNotification('Failed to place order', 'error');
+        return null;
+    }
+}
+
+async function loadUserOrders() {
+    if (!currentUser) return [];
+
+    try {
+        const customerId = getCurrentCustomerId();
+        const response = await fetch(`${API_BASE}/orders/customer/${customerId}`, {
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            return await response.json();
+        }
+        return [];
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        return [];
+    }
+}
+
+async function sendOrderConfirmation(orderData) {
+    try {
+        await fetch(`${API_BASE}/notifications/order-confirmation`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify(orderData)
+        });
+    } catch (error) {
+        console.error('Error sending order confirmation:', error);
+    }
+}
+
+// Utility functions
+function getCurrentCustomerId() {
+    // Extract customer ID from cookie or user data
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'customer_id') {
+            return parseInt(value);
+        }
+    }
+    return null;
+}
+
+}
+
+// Form handlers
+document.addEventListener('DOMContentLoaded', function() {
+    // Login form
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            login(email, password);
+        });
+    }
+
+    // Register form
+    const registerForm = document.getElementById('register-form');
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const name = `${firstName} ${lastName}`.trim();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            register(name, email, password);
+        });
+    }
+
+    // Checkout form
+    const checkoutForm = document.getElementById('checkout-form');
+    if (checkoutForm) {
+        checkoutForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (cart.items.length === 0) {
+                showNotification('Your cart is empty', 'error');
+                return;
+            }
+
+            const orderData = {
+                customer_id: getCurrentCustomerId(),
+                ship_amount: 5.99,
+                tax_amount: cart.final_amount * 0.08,
+                ship_address_id: 1, // Default address
+                card_type: document.getElementById('payment').value,
+                card_number: '1234567890123456', // In real app, use payment processor
+                card_expires: '12/25',
+                billing_address_id: 1, // Default address
+                items: cart.items.map(item => ({
+                    product_id: item.product_id,
+                    item_price: item.product_info.list_price,
+                    discount_amount: (item.product_info.list_price * item.product_info.discount_percent / 100) * item.quantity,
+                    quantity: item.quantity
+                }))
+            };
+
+            const order = await createOrder(orderData);
+            if (order) {
+                window.location.href = 'orders.html';
+            }
+        });
+    }
+});
+
+// Export functions for use in other scripts
+window.PhoneHubApp = {
+    login,
+    register,
+    logout,
+    addToCart,
+    removeFromCart,
+    updateCartItemQuantity,
+    loadProducts,
+    loadUserCart,
+    createOrder,
+    showNotification,
+    getCurrentCustomerId
+};
