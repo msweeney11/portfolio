@@ -7,16 +7,42 @@ function getQueryParam(param) {
 }
 
 // Utility: Check if user is logged in
-function isLoggedIn() {
-  return document.cookie.includes('session=');
+async function isLoggedIn() {
+  try {
+    console.log("Checking login status...");
+    const res = await fetch("/api/auth/verify", {
+      credentials: "include"
+    });
+
+    console.log("Login check response:", res.status);
+    res.text().then(body => console.log("Login check body:", body));
+
+    return res.ok;
+  } catch (err) {
+    console.error("Error checking login status:", err);
+    return false;
+  }
 }
 
 // Utility: Redirect if not logged in
-function requireLogin() {
-  if (!isLoggedIn()) {
-    window.location.href = 'login.html';
+async function requireLogin() {
+  // Skip login check if we just logged in
+  if (window.justLoggedIn) {
+    console.log("Skipping login check: just logged in");
+    // Optional: clear the flag after a short delay
+    setTimeout(() => {
+      window.justLoggedIn = false;
+    }, 2000);
+    return;
+  }
+
+  const loggedIn = await isLoggedIn();
+  if (!loggedIn) {
+    window.location.href = "login.html";
   }
 }
+
+
 
 async function loadProducts() {
   try {
@@ -84,6 +110,11 @@ async function loadProductDetail() {
 
     const product = await res.json();
 
+    document.querySelector('button.btn-outline-dark').addEventListener('click', () => {
+      addToCart(product.product_id);
+    });
+
+
     document.getElementById('product-name').textContent = product.product_name || 'Product Name';
     document.getElementById('product-price').textContent = `$${product.list_price || '0.00'}`;
     document.getElementById('product-description').textContent = product.description || 'No description available';
@@ -135,6 +166,7 @@ async function handleLogin(e) {
 
   if (result.message === "Logged in") {
     alert("Login successful!");
+    window.justLoggedIn = true;
     window.location.replace("/index.html");
   } else {
     alert("Login failed: " + (result.error || "Invalid credentials"));
@@ -181,7 +213,7 @@ async function handleRegister(e) {
 // Load cart
 async function loadCart() {
   requireLogin();
-  const res = await fetch('/api/cart');
+  const res = await fetch('/api/cart-items');
   const cart = await res.json();
   const container = document.getElementById('cart-items');
   cart.forEach(item => {
@@ -196,9 +228,29 @@ async function loadCart() {
   });
 }
 
+async function updateCartBadge() {
+  const badgeEls = document.querySelectorAll('.bi-cart-fill + .badge');
+  if (!isLoggedIn()) {
+    badgeEls.forEach(badge => badge.textContent = '0');
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/cart-items');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const cart = await res.json();
+    const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+    badgeEls.forEach(badge => badge.textContent = totalQty);
+  } catch (err) {
+    console.error('Failed to update cart badge:', err);
+    badgeEls.forEach(badge => badge.textContent = '0');
+  }
+}
+
 // Remove item from cart
 async function removeFromCart(id) {
-  await fetch(`/api/cart/${id}`, { method: 'DELETE' });
+  await fetch(`/api/cart-items/${id}`, { method: 'DELETE' });
+  updateCartBadge();
   location.reload();
 }
 
@@ -283,14 +335,42 @@ async function updateProfile(e) {
   alert('Profile updated');
 }
 
-// Page router
-document.addEventListener('DOMContentLoaded', () => {
-  const page = window.location.pathname;
+async function addToCart(productId) {
+  if (!isLoggedIn()) {
+    window.location.href = 'login.html';
+    return;
+  }
 
-  // Normalize route name
+  try {
+    const res = await fetch('/api/cart-items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: productId, quantity: 1 })
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    updateCartBadge(); // Refresh badge count
+    alert('Item added to cart!');
+  } catch (err) {
+    console.error('Failed to add to cart:', err);
+    alert('Failed to add item to cart');
+  }
+}
+
+
+// Page router
+document.addEventListener('DOMContentLoaded', async () => {
+  const page = window.location.pathname;
   const route = page === '/' ? 'login' : page.split('/').pop().replace('.html', '');
 
   console.log("Detected route:", route);
+  updateCartBadge();
+
+  const publicRoutes = ['login', 'register'];
+
+  if (!publicRoutes.includes(route)) {
+    await requireLogin();
+  }
 
   switch (route) {
     case 'index':
@@ -299,21 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     case 'product-detail':
       loadProductDetail();
-      break;
-
-    case 'login':
-      const loginForm = document.getElementById('login-form');
-      if (loginForm) {
-        console.log("Attaching login handler");
-        loginForm.addEventListener('submit', handleLogin);
-      }
-      break;
-
-    case 'register':
-      const registerForm = document.getElementById('register-form');
-      if (registerForm) {
-        registerForm.addEventListener('submit', handleRegister);
-      }
       break;
 
     case 'cart':
@@ -343,8 +408,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       break;
 
+    case 'login':
+      const loginForm = document.getElementById('login-form');
+      if (loginForm) {
+        console.log("Attaching login handler");
+        loginForm.addEventListener('submit', handleLogin);
+      }
+      break;
+
+    case 'register':
+      const registerForm = document.getElementById('register-form');
+      if (registerForm) {
+        registerForm.addEventListener('submit', handleRegister);
+      }
+      break;
+
     default:
       console.warn("No route matched for:", route);
   }
 });
+
+
 

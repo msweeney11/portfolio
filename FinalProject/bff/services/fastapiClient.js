@@ -2,27 +2,26 @@ const BASE_URL = "http://fastapi:8000";
 const AUTH_URL = process.env.AUTH_URL || "http://auth-service:8000";
 const CUSTOMER_URL = process.env.CUSTOMER_URL || "http://customer-service:8003";
 
+// Note: These functions are now mostly unused since we're doing direct fetch in auth.js
+// But keeping them for other potential uses
 export async function loginUser(email, password) {
   const res = await fetch("http://auth-service:8000/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
     body: JSON.stringify({ email, password })
   });
   return await res.json();
 }
 
-export async function registerUser(email_address, password, first_name, last_name) {
+export async function registerUser(userData) {
   const res = await fetch("http://auth-service:8000/auth/register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({
-      email_address,
-      password,
-      first_name,
-      last_name
-    })
+    credentials: "include", // Add this
+    body: JSON.stringify(userData)
   });
 
   if (res.redirected) {
@@ -32,12 +31,12 @@ export async function registerUser(email_address, password, first_name, last_nam
   return await res.json();
 }
 
-
-
 export async function fetchProducts(filters = {}) {
   try {
     const query = new URLSearchParams(filters).toString();
-    const res = await fetch(`${BASE_URL}/products${query ? '?' + query : ''}`);
+    const res = await fetch(`${BASE_URL}/products${query ? '?' + query : ''}`, {
+      credentials: "include" // Add this to all requests that might need auth
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch products: ${res.status}`);
@@ -52,7 +51,9 @@ export async function fetchProducts(filters = {}) {
 
 export async function fetchSingleProduct(productId) {
   try {
-    const res = await fetch(`${BASE_URL}/products/${productId}`);
+    const res = await fetch(`${BASE_URL}/products/${productId}`, {
+      credentials: "include"
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch product: ${res.status}`);
@@ -67,7 +68,9 @@ export async function fetchSingleProduct(productId) {
 
 export async function fetchOrderHistory(userId) {
   try {
-    const res = await fetch(`${BASE_URL}/orders?customer_id=${userId}`);
+    const res = await fetch(`${BASE_URL}/orders?customer_id=${userId}`, {
+      credentials: "include"
+    });
 
     if (!res.ok) {
       throw new Error(`Failed to fetch orders: ${res.status}`);
@@ -85,6 +88,7 @@ export async function createProduct(productData) {
     const res = await fetch(`${BASE_URL}/products/`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      credentials: "include",
       body: JSON.stringify(productData)
     });
 
@@ -107,6 +111,7 @@ export async function uploadImage(file) {
 
     const res = await fetch("http://admin-service:8000/admin/uploads/", {
       method: "POST",
+      credentials: "include",
       body: formData
     });
 
@@ -118,5 +123,29 @@ export async function uploadImage(file) {
   } catch (error) {
     console.error("Upload image error:", error);
     throw error;
+  }
+}
+
+// This function is now less important since we handle verification directly in BFF
+export async function verifyLogin(cookie) {
+  try {
+    const res = await fetch(`${AUTH_URL}/auth/verify`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(cookie ? { Cookie: cookie } : {})
+      },
+      credentials: "include" // Add this
+    });
+
+    if (!res.ok) {
+      return { loggedIn: false, status: res.status };
+    }
+
+    const data = await res.json();
+    return { loggedIn: true, user: data };
+  } catch (error) {
+    console.error("Verify login error:", error);
+    return { loggedIn: false, error };
   }
 }

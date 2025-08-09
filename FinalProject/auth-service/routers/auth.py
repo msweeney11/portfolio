@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Form, Response, Cookie
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel
 from models import get_db
 from sqlalchemy.orm import Session
@@ -19,33 +19,43 @@ class LoginRequest(BaseModel):
 
 # JSON-based login endpoint
 @router.post("/login")
-def login_customer(login_data: LoginRequest, response: Response):
+def login_customer(login_data: LoginRequest):
     print("Login attempt:", login_data.email)
     customer = fetch_customer_by_email(login_data.email)
 
     if not customer or not pwd_context.verify(login_data.password, customer["password"]):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+      raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
     token = create_access_token({"sub": customer["email_address"]})
-    set_session_cookie(response, token)
 
+    response = JSONResponse(content={
+      "message": "Logged in",
+      "session_token": token,  # Add this
+      "customer_id": customer["customer_id"]  # Add this
+    })
+
+    set_session_cookie(response, token)
     response.set_cookie(
-        key="customer_id",
-        value=str(customer["customer_id"]),
-        httponly=True,
-        secure=True,
-        samesite="Strict",
-        path="/"
+      key="customer_id",
+      value=str(customer["customer_id"]),
+      httponly=True,
+      secure=False,
+      samesite="Lax",
+      path="/",
+      max_age=24 * 60 * 60
     )
 
-    return {"message": "Logged in"}
+    print("Session token created:", token)
+    print("Setting customer_id cookie:", customer["customer_id"])
+    return response
+
 
 # Register customer
 class RegisterRequest(BaseModel):
-  email_address: str
-  password: str
-  first_name: str
-  last_name: str
+    email_address: str
+    password: str
+    first_name: str
+    last_name: str
 
 @router.post("/register")
 def register_customer(payload: RegisterRequest, response: Response):
@@ -71,8 +81,8 @@ def register_customer(payload: RegisterRequest, response: Response):
         key="customer_id",
         value=str(new_customer["customer_id"]),
         httponly=True,
-        secure=True,
-        samesite="Strict",
+        secure=False,
+        samesite=None,
         path="/"
     )
 
@@ -84,10 +94,27 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=1
     to_encode["exp"] = datetime.utcnow() + expires_delta
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
+from fastapi import Request, Cookie
+
 @router.get("/verify")
-def verify_token(token: str = Cookie(None)):
+def verify_session(
+    session: str = Cookie(None),
+    customer_id: str = Cookie(None)
+):
+    print("Incoming session cookie:", session)
+    print("Incoming customer_id cookie:", customer_id)
+
+    if not session or not customer_id:
+        raise HTTPException(status_code=401, detail="Missing cookies")
+
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return {"email": payload["sub"]}
-    except JWTError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+        payload = jwt.decode(session, SECRET_KEY, algorithms=[ALGORITHM])
+        print("Decoded JWT payload:", payload)
+    except JWTError as e:
+        print("JWT decode error:", str(e))
+        raise HTTPException(status_code=401, detail="Invalid session token")
+
+    return {"message": "Session valid", "email": payload.get("sub")}
+
+
+
