@@ -3,13 +3,13 @@ from sqlalchemy.exc import OperationalError
 
 def setup_database():
     from models.database import Base, engine
-    from models.orders import Order
-    from models.order_items import OrderItem
+    from models.products import Product
+    from models.categories import Category
 
     while True:
         try:
             Base.metadata.create_all(bind=engine)
-            print("Order service database setup complete")
+            print("Products service database setup complete")
             break
         except OperationalError:
             print("Waiting for MySQL to be ready...")

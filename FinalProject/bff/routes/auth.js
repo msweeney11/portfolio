@@ -20,7 +20,6 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-// Add this new registration route
 router.post("/register", async (req, res, next) => {
   console.log("Registration request received:", req.body);
   try {
@@ -31,21 +30,23 @@ router.post("/register", async (req, res, next) => {
     const first_name = nameParts[0] || '';
     const last_name = nameParts.slice(1).join(' ') || '';
 
-    const result = await registerUser({
+    const userData = {
       email_address: email,
       password: password,
       first_name: first_name,
       last_name: last_name
-    });
+    };
 
-    if (result.customer_id) {
+    const result = await registerUser(userData);
+
+    if (result.message === "Customer registered") {
       res.status(201).json({ message: "Account created successfully", customer: result });
     } else {
       res.status(400).json({ error: result.error || "Registration failed" });
     }
   } catch (err) {
     console.log("Error in BFF registration route:", err);
-    next(err);
+    res.status(400).json({ error: err.message || "Registration failed" });
   }
 });
 

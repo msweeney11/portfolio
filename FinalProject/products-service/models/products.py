@@ -16,22 +16,3 @@ class Product(Base):
 
     # Relationship to category
     category = relationship("Category", back_populates="products")
-
-# products-service/models/categories.py
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import relationship
-from .database import Base
-
-class Category(Base):
-    __tablename__ = "categories"
-
-    category_id = Column(Integer, primary_key=True)
-    category_name = Column(String(255), nullable=False, unique=True)
-
-    # Relationship to products
-    products = relationship("Product", back_populates="category")
-
-# products-service/models/__init__.py
-from .database import get_db, Base
-from .products import Product
-from .categories import Category

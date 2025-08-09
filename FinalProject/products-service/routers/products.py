@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session, joinedload
 from models import get_db, Product, Category
 from schemas import ProductCreate, ProductOut, ProductUpdate
 from datetime import datetime
+from typing import Optional
 import uuid
 
 router = APIRouter()

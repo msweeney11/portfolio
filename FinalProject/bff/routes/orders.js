@@ -67,7 +67,7 @@ router.get("/:id", async (req, res, next) => {
 });
 
 // Get customer orders
-router.get("/customer/:customerId", verifySession, async (req, res, next) => {
+router.get("/customer/:customerId", async (req, res, next) => {
   try {
     const customerId = req.params.customerId;
     const response = await fetch(`${ORDER_SERVICE_URL}/orders/customer/${customerId}/orders`);
@@ -109,4 +109,4 @@ router.put("/:id", verifySession, async (req, res, next) => {
   }
 });
 
-export default router;order-service
+export default router;
