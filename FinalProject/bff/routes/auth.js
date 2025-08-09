@@ -55,18 +55,16 @@ router.post("/login", async (req, res, next) => {
 router.post("/register", async (req, res, next) => {
   console.log("Registration request received:", req.body);
   try {
-    const { name, email, password } = req.body;
+    // Updated to match the new field structure
+    const { first_name, last_name, email_address, password } = req.body;
 
-    const nameParts = name.trim().split(' ');
-    const first_name = nameParts[0] || '';
-    const last_name = nameParts.slice(1).join(' ') || '';
-
-const authResponse = await fetch("http://auth-service:8000/auth/register", {
+    // No need for name parsing anymore since we get first_name and last_name directly
+    const authResponse = await fetch("http://auth-service:8000/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
-        email_address: email,
+        email_address: email_address, // Changed from email to email_address
         password: password,
         first_name: first_name,
         last_name: last_name

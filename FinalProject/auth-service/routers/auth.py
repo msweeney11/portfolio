@@ -17,7 +17,7 @@ class LoginRequest(BaseModel):
     password: str
 
 @router.post("/login")
-def login_customer(login_data: LoginRequest):
+async def login_customer(login_data: LoginRequest):
     print("Login attempt:", login_data.email)
     customer = await fetch_customer_by_email(login_data.email)  # Add await
 
