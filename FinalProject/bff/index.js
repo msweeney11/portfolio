@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import productRoutes from "./routes/products.js";
 import orderRoutes from "./routes/orders.js";
 import adminRoutes from "./routes/admin.js";
+import cartRoutes from "./routes/cartRoutes.js";
 import { handleError } from "./middleware/errorHandler.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -45,6 +46,7 @@ async function main() {
   app.use("/api/products", productRoutes);
   app.use("/api/orders", orderRoutes);
   app.use("/api/admin", adminRoutes);
+  app.use("/api/cart-items", cartRoutes);
 
   // Health check
   app.get("/health", (req, res) => {
@@ -85,3 +87,4 @@ async function main() {
 }
 
 main();
+

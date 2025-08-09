@@ -83,10 +83,25 @@ services:
     environment:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
 
+  cart-service:
+    build: ./cart-service
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./cart-service:/app
+    networks:
+      - backend
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
+      - PYTHONPATH=/app
+
   order-service:
     build: ./order-service
     ports:
-      - "8007:8004"  # External port 8007, internal 8004
+      - "8007:8007"  
     volumes:
       - ./order-service:/app
     networks:
@@ -105,7 +120,7 @@ services:
   products-service:
     build: ./products-service
     ports:
-      - "8004:8004"
+      - "8005:8005"
     volumes:
       - ./products-service:/app
     networks:
@@ -136,6 +151,7 @@ services:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
       - AUTH_URL=http://auth-service:8000
       - CUSTOMER_URL=http://customer-service:8003
+      - CART_URL=http://cart-service:8000
 
 volumes:
   db-data:
