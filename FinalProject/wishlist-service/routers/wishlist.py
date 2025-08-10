@@ -22,7 +22,7 @@ async def get_product_info(product_id: int):
   """Get product information from product service"""
   try:
     async with httpx.AsyncClient() as client:
-      response = await client.get(f"http://products-service:8004/products/{product_id}")
+      response = await client.get(f"http://products-service:8005/products/{product_id}")
       if response.status_code == 200:
         return response.json()
       return None

@@ -3,7 +3,7 @@ from .database import Base
 from datetime import datetime
 
 class WishlistItem(Base):
-    __tablename__ = "wishlists" 
+    __tablename__ = "wishlists"
 
     id = Column(Integer, primary_key=True, index=True)
     customer_id = Column(Integer, nullable=False)
