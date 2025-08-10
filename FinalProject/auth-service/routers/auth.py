@@ -144,7 +144,10 @@ def verify_session(
         print("JWT decode error:", str(e))
         raise HTTPException(status_code=401, detail="Invalid session token")
 
-    return {"message": "Session valid", "email": payload.get("sub")}
+    return {"message": "Session valid",
+            "email": payload.get("sub"),
+            "customer_id": customer_id
+    }
 
 
 

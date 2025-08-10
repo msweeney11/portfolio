@@ -1,6 +1,5 @@
 const API_BASE = '/api';
 let cartItems = [];
-let currentUser = null;
 let selectedItemForRemoval = null;
 let selectedItemForWishlist = null;
 let orderSummary = {

@@ -1,7 +1,7 @@
 // js/checkout.js
+// Add currentUser variable at the top with other variables
 const API_BASE = '/api';
 let cartItems = [];
-let currentUser = null;
 let orderSummary = {
     subtotal: 0,
     shipping: 5.99,
@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function initializeCheckoutPage() {
-    // Check if user is logged in
+    // Check if user is logged in (same pattern as cart.js)
     try {
         const response = await fetch('/api/auth/verify', {
             credentials: 'include'
@@ -26,9 +26,12 @@ async function initializeCheckoutPage() {
         if (response.ok) {
             const authData = await response.json();
             currentUser = authData;
+            console.log("User authenticated in checkout:", currentUser);
             await loadUserData();
             updateNavigation();
         } else {
+            // Redirect to login if not authenticated
+            console.log("Not authenticated, redirecting to login");
             window.location.href = 'login.html';
         }
     } catch (error) {
@@ -40,24 +43,34 @@ async function initializeCheckoutPage() {
 async function loadUserData() {
     try {
         const customerId = getCurrentCustomerId();
+        console.log("Loading user data for customer ID:", customerId);
+
         if (customerId) {
             const response = await fetch(`/api/customers/${customerId}`, {
                 credentials: 'include'
             });
             if (response.ok) {
                 const customer = await response.json();
+                console.log("Customer data loaded:", customer);
                 prefillCustomerInfo(customer);
+            } else {
+                console.log("Failed to load customer data:", response.status);
             }
         }
     } catch (error) {
-        console.log('Could not load customer data:', error);
+        console.error('Could not load customer data:', error);
     }
 }
 
 function prefillCustomerInfo(customer) {
-    document.getElementById('firstName').value = customer.first_name || '';
-    document.getElementById('lastName').value = customer.last_name || '';
-    document.getElementById('email').value = customer.email_address || '';
+    // Safely set form values
+    const firstNameEl = document.getElementById('firstName');
+    const lastNameEl = document.getElementById('lastName');
+    const emailEl = document.getElementById('email');
+
+    if (firstNameEl) firstNameEl.value = customer.first_name || '';
+    if (lastNameEl) lastNameEl.value = customer.last_name || '';
+    if (emailEl) emailEl.value = customer.email_address || customer.email || '';
 }
 
 function loadCartItems() {
@@ -125,10 +138,15 @@ function calculateTotals() {
 }
 
 function updateOrderSummary() {
-    document.getElementById('subtotal').textContent = `$${orderSummary.subtotal.toFixed(2)}`;
-    document.getElementById('shipping').textContent = orderSummary.shipping === 0 ? 'FREE' : `$${orderSummary.shipping.toFixed(2)}`;
-    document.getElementById('tax').textContent = `$${orderSummary.tax.toFixed(2)}`;
-    document.getElementById('total').textContent = `$${orderSummary.total.toFixed(2)}`;
+    const subtotalEl = document.getElementById('subtotal');
+    const shippingEl = document.getElementById('shipping');
+    const taxEl = document.getElementById('tax');
+    const totalEl = document.getElementById('total');
+
+    if (subtotalEl) subtotalEl.textContent = `$${orderSummary.subtotal.toFixed(2)}`;
+    if (shippingEl) shippingEl.textContent = orderSummary.shipping === 0 ? 'FREE' : `$${orderSummary.shipping.toFixed(2)}`;
+    if (taxEl) taxEl.textContent = `$${orderSummary.tax.toFixed(2)}`;
+    if (totalEl) totalEl.textContent = `$${orderSummary.total.toFixed(2)}`;
 }
 
 function setupBillingAddressToggle() {
@@ -209,37 +227,49 @@ function validateForm() {
     });
 
     // Validate email
-    const email = document.getElementById('email').value;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        document.getElementById('email').classList.add('is-invalid');
-        showNotification('Please enter a valid email address', 'error');
-        isValid = false;
+    const emailEl = document.getElementById('email');
+    if (emailEl) {
+        const email = emailEl.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            emailEl.classList.add('is-invalid');
+            showNotification('Please enter a valid email address', 'error');
+            isValid = false;
+        }
     }
 
     // Validate card number (basic check)
-    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
-    if (cardNumber.length < 13 || cardNumber.length > 19) {
-        document.getElementById('cardNumber').classList.add('is-invalid');
-        showNotification('Please enter a valid card number', 'error');
-        isValid = false;
+    const cardNumberEl = document.getElementById('cardNumber');
+    if (cardNumberEl) {
+        const cardNumber = cardNumberEl.value.replace(/\s/g, '');
+        if (cardNumber.length < 13 || cardNumber.length > 19) {
+            cardNumberEl.classList.add('is-invalid');
+            showNotification('Please enter a valid card number', 'error');
+            isValid = false;
+        }
     }
 
     // Validate expiry date
-    const expiry = document.getElementById('cardExpiry').value;
-    const expiryRegex = /^\d{2}\/\d{2}$/;
-    if (!expiryRegex.test(expiry)) {
-        document.getElementById('cardExpiry').classList.add('is-invalid');
-        showNotification('Please enter a valid expiry date (MM/YY)', 'error');
-        isValid = false;
+    const cardExpiryEl = document.getElementById('cardExpiry');
+    if (cardExpiryEl) {
+        const expiry = cardExpiryEl.value;
+        const expiryRegex = /^\d{2}\/\d{2}$/;
+        if (!expiryRegex.test(expiry)) {
+            cardExpiryEl.classList.add('is-invalid');
+            showNotification('Please enter a valid expiry date (MM/YY)', 'error');
+            isValid = false;
+        }
     }
 
     // Validate CVV
-    const cvv = document.getElementById('cardCVV').value;
-    if (cvv.length < 3 || cvv.length > 4) {
-        document.getElementById('cardCVV').classList.add('is-invalid');
-        showNotification('Please enter a valid CVV', 'error');
-        isValid = false;
+    const cvvEl = document.getElementById('cardCVV');
+    if (cvvEl) {
+        const cvv = cvvEl.value;
+        if (cvv.length < 3 || cvv.length > 4) {
+            cvvEl.classList.add('is-invalid');
+            showNotification('Please enter a valid CVV', 'error');
+            isValid = false;
+        }
     }
 
     if (!isValid) {
@@ -257,9 +287,12 @@ async function placeOrder() {
         placeOrderBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Processing...';
         placeOrderBtn.disabled = true;
 
+        // Get customer ID using the function from scripts.js
         const customerId = getCurrentCustomerId();
+        console.log("Placing order for customer ID:", customerId);
+
         if (!customerId) {
-            throw new Error('User not logged in');
+            throw new Error('User not authenticated. Please log in again.');
         }
 
         // Prepare order data
@@ -280,6 +313,8 @@ async function placeOrder() {
             }))
         };
 
+        console.log("Order data being sent:", orderData);
+
         // Submit order
         const response = await fetch(`${API_BASE}/orders`, {
             method: 'POST',
@@ -290,23 +325,35 @@ async function placeOrder() {
             body: JSON.stringify(orderData)
         });
 
+        console.log("Order response status:", response.status);
+
         if (response.ok) {
             const order = await response.json();
+            console.log("Order placed successfully:", order);
 
             // Clear cart
             localStorage.removeItem('phonehub_cart');
 
             // Show success modal
-            document.getElementById('order-number').textContent = order.order_id;
-            const successModal = new bootstrap.Modal(document.getElementById('orderSuccessModal'));
-            successModal.show();
+            const orderNumberEl = document.getElementById('order-number');
+            if (orderNumberEl) {
+                orderNumberEl.textContent = order.order_id || order.id || 'Unknown';
+            }
+
+            const successModal = document.getElementById('orderSuccessModal');
+            if (successModal && typeof bootstrap !== 'undefined') {
+                const bsModal = new bootstrap.Modal(successModal);
+                bsModal.show();
+            }
 
             // Reset form
-            document.getElementById('checkout-form').reset();
+            const form = document.getElementById('checkout-form');
+            if (form) form.reset();
 
         } else {
             const error = await response.json();
-            throw new Error(error.detail || 'Failed to place order');
+            console.error("Order placement failed:", error);
+            throw new Error(error.detail || error.message || 'Failed to place order');
         }
 
     } catch (error) {
@@ -315,13 +362,18 @@ async function placeOrder() {
     } finally {
         // Restore button
         const placeOrderBtn = document.querySelector('button[onclick="placeOrder()"]');
-        placeOrderBtn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Place Order';
-        placeOrderBtn.disabled = false;
+        if (placeOrderBtn) {
+            placeOrderBtn.innerHTML = '<i class="bi bi-credit-card me-2"></i>Place Order';
+            placeOrderBtn.disabled = false;
+        }
     }
 }
 
 function applyPromoCode() {
-    const promoCode = document.getElementById('promoCode').value.trim().toUpperCase();
+    const promoCodeEl = document.getElementById('promoCode');
+    if (!promoCodeEl) return;
+
+    const promoCode = promoCodeEl.value.trim().toUpperCase();
 
     if (!promoCode) {
         showNotification('Please enter a promo code', 'warning');
@@ -359,22 +411,43 @@ function applyPromoCode() {
         showNotification(`Promo code applied: ${promo.description}`, 'success');
 
         // Disable promo input
-        document.getElementById('promoCode').disabled = true;
-        document.querySelector('button[onclick="applyPromoCode()"]').disabled = true;
+        promoCodeEl.disabled = true;
+        const promoBtn = document.querySelector('button[onclick="applyPromoCode()"]');
+        if (promoBtn) promoBtn.disabled = true;
 
     } else {
         showNotification('Invalid promo code', 'error');
     }
 }
 
+// Use the same function from scripts.js but prioritize cookie first
 function getCurrentCustomerId() {
+    // First check cookies since we know the cookie is being set correctly
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
         const [name, value] = cookie.trim().split('=');
         if (name === 'customer_id') {
-            return parseInt(value);
+            const cookieCustomerId = parseInt(value);
+            console.log("Customer ID from cookie:", cookieCustomerId);
+            return cookieCustomerId;
         }
     }
+
+    // Fallback: try to get it from the global currentUser object (set by scripts.js)
+    if (window.currentUser && window.currentUser.customer_id) {
+        console.log("Customer ID from window.currentUser:", window.currentUser.customer_id);
+        return window.currentUser.customer_id;
+    }
+
+    // Last fallback: try to get from currentUser variable in this scope
+    if (typeof currentUser !== 'undefined' && currentUser && currentUser.customer_id) {
+        console.log("Customer ID from local currentUser:", currentUser.customer_id);
+        return currentUser.customer_id;
+    }
+
+    console.error("Could not find customer ID in any location");
+    console.log("Available cookies:", document.cookie);
+    console.log("window.currentUser:", window.currentUser);
     return null;
 }
 
@@ -411,10 +484,16 @@ function updateNavigation() {
 
 async function logout() {
     try {
+        // Clear local state
+        currentUser = null;
+
+        // Clear cookies and storage
         document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         document.cookie = 'customer_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         localStorage.removeItem('phonehub_cart');
         localStorage.removeItem('phonehub_wishlist');
+        localStorage.setItem('user_logged_out', 'true');
+
         showNotification('Logged out successfully', 'success');
         setTimeout(() => {
             window.location.href = 'index.html';
@@ -448,3 +527,8 @@ function showNotification(message, type = 'info') {
         }
     }, 5000);
 }
+
+// Make functions globally available
+window.placeOrder = placeOrder;
+window.applyPromoCode = applyPromoCode;
+window.logout = logout;
