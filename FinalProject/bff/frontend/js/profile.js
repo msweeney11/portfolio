@@ -69,9 +69,17 @@ function populateProfileForm(profile) {
 }
 
 async function loadUserOrders() {
+    const ordersList = document.getElementById('orders-list');
+    if (!ordersList) return;
+
     try {
         const customerId = getCurrentCustomerId();
-        if (!customerId) return;
+        if (!customerId) {
+            displayNoOrders();
+            return;
+        }
+
+        console.log('Loading orders for customer:', customerId);
 
         const response = await fetch(`${API_BASE}/orders/customer/${customerId}`, {
             credentials: 'include'
@@ -79,13 +87,27 @@ async function loadUserOrders() {
 
         if (response.ok) {
             const orders = await response.json();
-            displayOrders(orders);
-        } else {
+            console.log('Orders loaded:', orders);
+
+            // Ensure orders is an array
+            const ordersArray = Array.isArray(orders) ? orders : [];
+
+            if (ordersArray.length > 0) {
+                displayOrders(ordersArray);
+            } else {
+                displayNoOrders();
+            }
+        } else if (response.status === 404) {
+            // No orders found - normal for new customers
+            console.log('No orders found for customer');
             displayNoOrders();
+        } else {
+            console.error('Failed to load orders:', response.status, response.statusText);
+            displayOrdersError('Failed to load order history. Please try again later.');
         }
     } catch (error) {
         console.error('Error loading orders:', error);
-        displayNoOrders();
+        displayOrdersError('Unable to connect to the server. Please check your connection and try again.');
     }
 }
 
@@ -98,24 +120,27 @@ function displayOrders(orders) {
         return;
     }
 
+    // Sort orders by date (newest first)
+    orders.sort((a, b) => new Date(b.order_date || b.created_at) - new Date(a.order_date || a.created_at));
+
     ordersList.innerHTML = orders.map(order => `
         <div class="card mb-3 border-0 shadow-sm">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <h6 class="card-title mb-1">
-                            <i class="bi bi-receipt me-2"></i>Order #${order.order_id}
+                            <i class="bi bi-receipt me-2"></i>Order #${order.order_id || order.id}
                         </h6>
                         <p class="text-muted small mb-2">
                             <i class="bi bi-calendar me-1"></i>
-                            ${new Date(order.order_date).toLocaleDateString()}
+                            ${new Date(order.order_date || order.created_at).toLocaleDateString()}
                         </p>
                         <div class="mb-2">
-                            ${order.items ? order.items.map(item => `
+                            ${order.items && Array.isArray(order.items) ? order.items.map(item => `
                                 <span class="badge bg-light text-dark me-1">
-                                    ${item.quantity}x Product #${item.product_id}
+                                    ${item.quantity || 1}x ${item.product_name || item.name || `Product #${item.product_id || item.id}`}
                                 </span>
-                            `).join('') : ''}
+                            `).join('') : '<span class="badge bg-light text-dark">Order details not available</span>'}
                         </div>
                     </div>
                     <div class="text-end">
@@ -125,6 +150,32 @@ function displayOrders(orders) {
                         <span class="badge bg-${getOrderStatusColor(order)} ms-2">
                             ${getOrderStatus(order)}
                         </span>
+                        ${order.tracking_number ? `
+                            <div class="small text-muted mt-1">
+                                Tracking: <code>${order.tracking_number}</code>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <!-- Order Actions -->
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-primary" onclick="viewOrderDetails(${order.order_id || order.id})">
+                                <i class="bi bi-eye me-1"></i>View Details
+                            </button>
+                            ${order.tracking_number ? `
+                                <button class="btn btn-outline-info" onclick="trackOrder('${order.tracking_number}')">
+                                    <i class="bi bi-geo-alt me-1"></i>Track Package
+                                </button>
+                            ` : ''}
+                            ${(order.order_status === 'delivered' || order.ship_date) ? `
+                                <button class="btn btn-outline-success" onclick="reorderItems(${order.order_id || order.id})">
+                                    <i class="bi bi-arrow-repeat me-1"></i>Reorder
+                                </button>
+                            ` : ''}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -139,8 +190,9 @@ function displayNoOrders() {
     ordersList.innerHTML = `
         <div class="text-center py-4 text-muted">
             <i class="bi bi-box display-4 mb-3"></i>
-            <p>No orders found</p>
-            <p class="small">Start shopping to see your orders here</p>
+            <h5>No Orders Yet</h5>
+            <p>You haven't placed any orders yet.</p>
+            <p class="small">Start shopping to see your orders here!</p>
             <a href="index.html" class="btn btn-primary">
                 <i class="bi bi-shop me-2"></i>Start Shopping
             </a>
@@ -148,32 +200,105 @@ function displayNoOrders() {
     `;
 }
 
+function displayOrdersError(message) {
+    const ordersList = document.getElementById('orders-list');
+    if (!ordersList) return;
+
+    ordersList.innerHTML = `
+        <div class="text-center py-4">
+            <i class="bi bi-exclamation-triangle display-4 mb-3 text-warning"></i>
+            <h5>Unable to Load Orders</h5>
+            <p class="text-muted">${message}</p>
+            <button class="btn btn-primary" onclick="loadUserOrders()">
+                <i class="bi bi-arrow-clockwise me-2"></i>Try Again
+            </button>
+        </div>
+    `;
+}
+
 function calculateOrderTotal(order) {
     let total = 0;
-    if (order.items) {
+
+    // Try multiple possible total fields
+    if (order.order_total) {
+        total = parseFloat(order.order_total);
+    } else if (order.total) {
+        total = parseFloat(order.total);
+    } else if (order.items && Array.isArray(order.items)) {
+        // Calculate from items if no total is provided
         total = order.items.reduce((sum, item) => {
-            return sum + (item.item_price * item.quantity) - item.discount_amount;
+            const itemPrice = parseFloat(item.item_price || item.price || item.unit_price || 0);
+            const quantity = parseInt(item.quantity || 1);
+            const discount = parseFloat(item.discount_amount || 0);
+            return sum + (itemPrice * quantity) - discount;
         }, 0);
+
+        // Add shipping and tax if available
+        total += parseFloat(order.ship_amount || order.shipping_cost || 0);
+        total += parseFloat(order.tax_amount || order.tax || 0);
     }
-    total += order.ship_amount || 0;
-    total += order.tax_amount || 0;
-    return total.toFixed(2);
+
+    return Math.max(0, total).toFixed(2);
 }
 
 function getOrderStatus(order) {
-    if (order.ship_date) {
+    if (order.order_status) {
+        return order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1);
+    } else if (order.ship_date) {
         return 'Shipped';
+    } else if (order.status) {
+        return order.status.charAt(0).toUpperCase() + order.status.slice(1);
     } else {
         return 'Processing';
     }
 }
 
 function getOrderStatusColor(order) {
-    if (order.ship_date) {
-        return 'success';
-    } else {
-        return 'warning';
+    const status = (order.order_status || order.status || '').toLowerCase();
+
+    switch (status) {
+        case 'delivered':
+            return 'success';
+        case 'shipped':
+            return 'info';
+        case 'cancelled':
+        case 'canceled':
+            return 'danger';
+        case 'pending':
+            return 'secondary';
+        case 'processing':
+        default:
+            return order.ship_date ? 'info' : 'warning';
     }
+}
+
+// Order action functions
+function viewOrderDetails(orderId) {
+    // You can implement a modal or redirect to a detailed order page
+    console.log('View details for order:', orderId);
+    showNotification(`Viewing details for order #${orderId}`, 'info');
+    // Example: window.location.href = `order-details.html?id=${orderId}`;
+}
+
+function trackOrder(trackingNumber) {
+    if (!trackingNumber) {
+        showNotification('No tracking number available', 'warning');
+        return;
+    }
+
+    console.log('Track order with number:', trackingNumber);
+    showNotification(`Tracking package: ${trackingNumber}`, 'info');
+
+    // In a real app, you'd redirect to the carrier's tracking page
+    // Example: window.open(`https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${trackingNumber}`, '_blank');
+}
+
+function reorderItems(orderId) {
+    console.log('Reorder items from order:', orderId);
+    showNotification(`Reordering items from order #${orderId}`, 'success');
+
+    // In a real app, you'd add the order items back to the cart
+    // This would typically involve fetching the order details and adding items to cart
 }
 
 function initializeForms() {

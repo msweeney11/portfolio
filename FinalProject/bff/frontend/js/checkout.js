@@ -57,8 +57,13 @@ async function loadUserData() {
                 console.log("Failed to load customer data:", response.status);
             }
         }
+
+        // Always populate demo payment info
+        prefillDemoPaymentInfo();
     } catch (error) {
         console.error('Could not load customer data:', error);
+        // Still populate demo payment info even if customer data fails
+        prefillDemoPaymentInfo();
     }
 }
 
@@ -71,6 +76,42 @@ function prefillCustomerInfo(customer) {
     if (firstNameEl) firstNameEl.value = customer.first_name || '';
     if (lastNameEl) lastNameEl.value = customer.last_name || '';
     if (emailEl) emailEl.value = customer.email_address || customer.email || '';
+}
+
+function prefillDemoPaymentInfo() {
+    // Auto-populate payment fields with demo data
+    const cardTypeEl = document.getElementById('cardType');
+    const cardNumberEl = document.getElementById('cardNumber');
+    const cardExpiryEl = document.getElementById('cardExpiry');
+    const cardCVVEl = document.getElementById('cardCVV');
+
+    if (cardTypeEl) cardTypeEl.value = 'Visa';
+    if (cardNumberEl) cardNumberEl.value = '4532 1234 5678 9012';
+    if (cardExpiryEl) cardExpiryEl.value = '12/28';
+    if (cardCVVEl) cardCVVEl.value = '123';
+
+    // Also prefill some demo address info if fields are empty
+    const shippingAddress1El = document.getElementById('shippingAddress1');
+    const shippingCityEl = document.getElementById('shippingCity');
+    const shippingStateEl = document.getElementById('shippingState');
+    const shippingZipEl = document.getElementById('shippingZip');
+    const phoneEl = document.getElementById('phone');
+
+    if (shippingAddress1El && !shippingAddress1El.value) {
+        shippingAddress1El.value = '123 Demo Street';
+    }
+    if (shippingCityEl && !shippingCityEl.value) {
+        shippingCityEl.value = 'Demo City';
+    }
+    if (shippingStateEl && !shippingStateEl.value) {
+        shippingStateEl.value = 'CA';
+    }
+    if (shippingZipEl && !shippingZipEl.value) {
+        shippingZipEl.value = '90210';
+    }
+    if (phoneEl && !phoneEl.value) {
+        phoneEl.value = '(555) 123-4567';
+    }
 }
 
 function loadCartItems() {
@@ -295,9 +336,10 @@ async function placeOrder() {
             throw new Error('User not authenticated. Please log in again.');
         }
 
-        // Prepare order data
+        // Prepare order data with complete information
         const orderData = {
             customer_id: customerId,
+            order_total: orderSummary.total,        // Add order total
             ship_amount: orderSummary.shipping,
             tax_amount: orderSummary.tax,
             ship_address_id: 1, // In a real app, this would be from address management
@@ -307,7 +349,9 @@ async function placeOrder() {
             billing_address_id: 1, // In a real app, this would be from address management
             items: cartItems.map(item => ({
                 product_id: item.productId,
-                item_price: item.price,
+                product_name: item.name,            // Include product name
+                item_price: item.price,             // Keep original price field
+                price: item.price,                  // Add price as fallback
                 discount_amount: 0,
                 quantity: item.quantity
             }))

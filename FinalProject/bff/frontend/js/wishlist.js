@@ -1,4 +1,4 @@
-const API_BASE = '/api'; // Define API base URL
+const API_BASE = 'http://localhost:8006';
 
 async function loadWishlist() {
     try {
