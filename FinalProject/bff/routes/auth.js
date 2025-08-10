@@ -90,6 +90,62 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
+router.post("/logout", async (req, res, next) => {
+  console.log("BFF logout request received");
+  try {
+    // Forward the logout request to auth-service
+    const authResponse = await fetch("http://auth-service:8000/auth/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // Forward cookies to auth-service so it can clear them
+        ...(req.headers.cookie ? { Cookie: req.headers.cookie } : {})
+      },
+      credentials: "include"
+    });
+
+    const result = await authResponse.json();
+    console.log("Logout result from auth-service:", result);
+
+    if (authResponse.ok) {
+      // Clear cookies in BFF as well (belt and suspenders approach)
+      res.clearCookie('session', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'Lax',
+        path: '/'
+      });
+
+      res.clearCookie('customer_id', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'Lax',
+        path: '/'
+      });
+
+      // Also try clearing without options in case they were set differently
+      res.clearCookie('session');
+      res.clearCookie('customer_id');
+
+      console.log("Cookies cleared in BFF");
+      return res.status(200).json({ message: "Logged out successfully" });
+    } else {
+      console.log("Auth-service logout failed:", result);
+      // Even if auth-service fails, we should still clear local cookies
+      res.clearCookie('session');
+      res.clearCookie('customer_id');
+      return res.status(200).json({ message: "Logged out" });
+    }
+
+  } catch (err) {
+    console.log("Error in BFF logout route:", err);
+    // Clear cookies even on error
+    res.clearCookie('session');
+    res.clearCookie('customer_id');
+    res.status(200).json({ message: "Logged out" });
+  }
+});
+
 router.get("/verify", async (req, res) => {
   try {
     console.log("BFF verify - incoming cookies:", req.headers.cookie);
