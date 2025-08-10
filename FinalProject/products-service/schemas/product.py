@@ -22,6 +22,7 @@ class ProductBase(BaseModel):
     list_price: float = Field(..., gt=0)
     discount_percent: float = Field(default=0.0, ge=0, le=100)
     date_added: Optional[datetime] = None
+    image_url: Optional[str] = Field(None, max_length=500)  # Add image_url field
 
 class ProductCreate(ProductBase):
     pass
@@ -33,6 +34,7 @@ class ProductUpdate(BaseModel):
     description: Optional[str] = None
     list_price: Optional[float] = Field(None, gt=0)
     discount_percent: Optional[float] = Field(None, ge=0, le=100)
+    image_url: Optional[str] = Field(None, max_length=500)  # Add image_url field
 
 class ProductOut(ProductBase):
     product_id: int
