@@ -9,3 +9,7 @@ app = FastAPI()
 
 # Include customer routes
 app.include_router(customers.router, tags=["Customers"])
+
+@app.get("/health")
+def health_check():
+    return {"service": "customer-service", "status": "healthy"}
