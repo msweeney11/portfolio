@@ -1155,6 +1155,7 @@ function addToWishlistFromModal() {
     }
 }
 
+
 // Export functions for global access
 window.PhoneHubApp = {
     login,

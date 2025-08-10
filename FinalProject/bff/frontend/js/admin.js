@@ -24,7 +24,7 @@ async function loadProducts() {
 
 async function loadCategories() {
     try {
-        const response = await fetch('/api/products/categories');
+        const response = await fetch('/api/products/categories/all');
         if (response.ok) {
             const categories = await response.json();
             populateCategoryDropdown(categories);
@@ -59,8 +59,8 @@ function displayProducts(products) {
     }
 
     productList.innerHTML = products.map(product => {
-        // Get the product image URL
         const imageUrl = getProductImageUrl(product);
+        const fallbackImage = getPlaceholderImage('default', 80, 80);
 
         return `
             <li class="list-group-item d-flex justify-content-between align-items-start">
@@ -70,7 +70,7 @@ function displayProducts(products) {
                              alt="${product.product_name}"
                              class="rounded"
                              style="width: 80px; height: 80px; object-fit: cover;"
-                             onerror="this.src='https://via.placeholder.com/80x80/6c757d/ffffff?text=No+Image'">
+                             onerror="this.onerror=null; this.src='${fallbackImage}'">
                     </div>
                     <div class="ms-2 me-auto">
                         <div class="fw-bold text-primary">
@@ -89,17 +89,23 @@ function displayProducts(products) {
                         ${product.image_url ? `
                             <div class="mt-2">
                                 <small class="text-info">
-                                    <i class="bi bi-image me-1"></i>Image uploaded
+                                    <i class="bi bi-image me-1"></i>Custom image uploaded
                                 </small>
                             </div>
-                        ` : ''}
+                        ` : `
+                            <div class="mt-2">
+                                <small class="text-warning">
+                                    <i class="bi bi-image me-1"></i>Using category default image
+                                </small>
+                            </div>
+                        `}
                     </div>
                 </div>
                 <div class="btn-group" role="group">
-                    <button class="btn btn-outline-primary btn-sm" onclick="editProduct(${product.product_id})">
+                    <button class="btn btn-outline-primary btn-sm" onclick="editProduct(${product.product_id})" title="Edit Product">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${product.product_id})">
+                    <button class="btn btn-outline-danger btn-sm" onclick="deleteProduct(${product.product_id})" title="Delete Product">
                         <i class="bi bi-trash"></i>
                     </button>
                 </div>
@@ -108,14 +114,17 @@ function displayProducts(products) {
     }).join('');
 }
 
+// Use the same image handling functions from scripts.js
 function getProductImageUrl(product) {
-    // If product has an uploaded image
+    if (!product) return getPlaceholderImage('default');
+
+    // If product has an uploaded image URL
     if (product.image_url && product.image_url.trim() !== '') {
-        // If it starts with /static, it's a local upload
+        // If it starts with /static, it's from admin-service
         if (product.image_url.startsWith('/static')) {
             return `http://localhost:8001${product.image_url}`;
         }
-        // If it's already a full URL
+        // If it's already a full URL (like Unsplash)
         if (product.image_url.startsWith('http')) {
             return product.image_url;
         }
@@ -123,32 +132,67 @@ function getProductImageUrl(product) {
         return `http://localhost:8001${product.image_url}`;
     }
 
-    // Fallback to a default image based on category or product name
-    return getDefaultImageForProduct(product);
+    // Fallback to category-based placeholder
+    return getCategoryImage(product);
 }
 
-function getDefaultImageForProduct(product) {
-    const productName = product.product_name.toLowerCase();
+function getCategoryImage(product) {
+    if (!product) return getPlaceholderImage('default');
 
-    // Phone cases
-    if (productName.includes('case') || productName.includes('cover')) {
-        return 'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=300&h=300&fit=crop';
+    const productName = product.product_name ? product.product_name.toLowerCase() : '';
+    const categoryName = product.category ? product.category.category_name.toLowerCase() : '';
+
+    // Phone cases and covers
+    if (productName.includes('case') || productName.includes('cover') || categoryName.includes('case')) {
+        return 'https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?w=400&h=400&fit=crop';
     }
-    // Chargers
-    if (productName.includes('charger') || productName.includes('cable')) {
-        return 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=300&h=300&fit=crop';
+    // Chargers and cables
+    if (productName.includes('charger') || productName.includes('cable') || productName.includes('charging') || categoryName.includes('charger')) {
+        return 'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=400&h=400&fit=crop';
     }
-    // Audio
-    if (productName.includes('headphone') || productName.includes('earbuds') || productName.includes('speaker')) {
-        return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300&h=300&fit=crop';
+    // Audio accessories
+    if (productName.includes('headphone') || productName.includes('earbuds') || productName.includes('speaker') || productName.includes('audio') || categoryName.includes('audio')) {
+        return 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=400&fit=crop';
+    }
+    // Car mounts and stands
+    if (productName.includes('mount') || productName.includes('stand') || categoryName.includes('mount') || categoryName.includes('stand')) {
+        return 'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=400&fit=crop';
     }
     // Screen protectors
-    if (productName.includes('screen') || productName.includes('protector')) {
-        return 'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=300&h=300&fit=crop';
+    if (productName.includes('screen') || productName.includes('protector') || productName.includes('glass') || categoryName.includes('protector')) {
+        return 'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=400&fit=crop';
+    }
+    // Power banks and batteries
+    if (productName.includes('power') || productName.includes('bank') || productName.includes('battery') || categoryName.includes('power') || categoryName.includes('batteries')) {
+        return 'https://images.unsplash.com/photo-1609592173572-a4c7a0b09be5?w=400&h=400&fit=crop';
+    }
+    // Phone grips and rings
+    if (productName.includes('grip') || productName.includes('ring') || productName.includes('pop') || categoryName.includes('grip') || categoryName.includes('ring')) {
+        return 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=400&fit=crop';
+    }
+    // Camera accessories
+    if (productName.includes('camera') || productName.includes('lens') || productName.includes('tripod') || categoryName.includes('camera')) {
+        return 'https://images.unsplash.com/photo-1606983340091-bd40bbf55be3?w=400&h=400&fit=crop';
     }
 
     // Default phone accessory image
-    return 'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=300&h=300&fit=crop';
+    return 'https://images.unsplash.com/photo-1556656793-08538906a9f8?w=400&h=400&fit=crop';
+}
+
+function getPlaceholderImage(type = 'default', width = 400, height = 400) {
+    const placeholders = {
+        case: `https://via.placeholder.com/${width}x${height}/007bff/ffffff?text=Phone+Case`,
+        charger: `https://via.placeholder.com/${width}x${height}/28a745/ffffff?text=Charger`,
+        audio: `https://via.placeholder.com/${width}x${height}/6f42c1/ffffff?text=Audio`,
+        mount: `https://via.placeholder.com/${width}x${height}/fd7e14/ffffff?text=Mount`,
+        screen: `https://via.placeholder.com/${width}x${height}/20c997/ffffff?text=Screen`,
+        power: `https://via.placeholder.com/${width}x${height}/e83e8c/ffffff?text=Power`,
+        grip: `https://via.placeholder.com/${width}x${height}/6c757d/ffffff?text=Grip`,
+        camera: `https://via.placeholder.com/${width}x${height}/17a2b8/ffffff?text=Camera`,
+        default: `https://via.placeholder.com/${width}x${height}/6c757d/ffffff?text=Phone+Accessory`
+    };
+
+    return placeholders[type] || placeholders.default;
 }
 
 function initializeProductForm() {

@@ -1,4 +1,3 @@
-# docker-compose.yml
 version: '3.8'
 
 services:
@@ -163,11 +162,13 @@ services:
       - auth-service
       - customer-service
       - admin-service
+      - products-service
     environment:
       - DATABASE_URL=mysql+pymysql://root:rootpass@mysql-db:3306/accessory_shop
       - AUTH_URL=http://auth-service:8000
       - CUSTOMER_URL=http://customer-service:8003
-      - CART_URL=http://cart-service:8000
+      - CART_URL=http://cart-service:8004
+      - PRODUCTS_URL=http://products-service:8005
 
 volumes:
   db-data:

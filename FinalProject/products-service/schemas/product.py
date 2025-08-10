@@ -2,6 +2,13 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
 
+class CategoryOut(BaseModel):
+    category_id: int
+    category_name: str
+
+    class Config:
+        from_attributes = True
+
 class ProductBase(BaseModel):
     category_id: int
     product_code: str = Field(..., max_length=50)
@@ -10,7 +17,7 @@ class ProductBase(BaseModel):
     list_price: float = Field(..., gt=0)
     discount_percent: float = Field(default=0.0, ge=0, le=100)
     date_added: Optional[datetime] = None
-    image_url: Optional[str] = Field(None, max_length=500)  # Add this line
+    image_url: Optional[str] = Field(None, max_length=500)
 
 class ProductCreate(ProductBase):
     pass
@@ -22,11 +29,21 @@ class ProductUpdate(BaseModel):
     description: Optional[str] = None
     list_price: Optional[float] = Field(None, gt=0)
     discount_percent: Optional[float] = Field(None, ge=0, le=100)
-    image_url: Optional[str] = Field(None, max_length=500)  # Add this line
+    image_url: Optional[str] = Field(None, max_length=500)
 
 class ProductOut(ProductBase):
     product_id: int
     category: Optional[CategoryOut] = None
+
+    class Config:
+        from_attributes = True
+
+class CategoryCreate(BaseModel):
+    category_name: str = Field(..., max_length=255)
+
+class CategoryOut(BaseModel):
+    category_id: int
+    category_name: str
 
     class Config:
         from_attributes = True

@@ -1,3 +1,4 @@
+# FinalProject/products-service/Dockerfile
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -9,6 +10,6 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-EXPOSE 8004
+EXPOSE 8005
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8004"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8005"]

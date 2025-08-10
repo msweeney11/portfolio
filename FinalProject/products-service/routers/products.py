@@ -50,7 +50,9 @@ async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
   return product_with_category
 
 
-@router.get("/", response_model=list[ProductOut])
+# Fix the route - remove trailing slash to avoid redirect
+@router.get("", response_model=list[ProductOut])  # no slash
+@router.get("/", response_model=list[ProductOut])  # slash version
 async def get_products(
   category_id: Optional[int] = Query(None),
   search: Optional[str] = Query(None),
