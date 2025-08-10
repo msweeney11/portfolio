@@ -209,7 +209,6 @@ function displayOrders() {
     updatePagination();
 }
 
-// Create individual order card HTML
 function createOrderCard(order) {
     const status = order.order_status || order.status || 'pending';
     const statusConfig = orderStatusConfig[status] || orderStatusConfig['pending'];
@@ -219,9 +218,13 @@ function createOrderCard(order) {
     // Handle order items - they might be in different formats
     let itemsDisplay = '';
     if (order.items && Array.isArray(order.items)) {
-        itemsDisplay = order.items.slice(0, 2).map(item =>
-            `<div class="small text-muted">• ${item.product_name || item.name || 'Product'} (x${item.quantity || 1})</div>`
-        ).join('');
+        itemsDisplay = order.items.slice(0, 2).map(item => {
+            // Try multiple property names for product name
+            const productName = item.product_name || item.name || `Product ID: ${item.product_id || item.id || 'Unknown'}`;
+            const quantity = item.quantity || 1;
+
+            return `<div class="small text-muted">• ${productName} (x${quantity})</div>`;
+        }).join('');
 
         if (order.items.length > 2) {
             itemsDisplay += `<div class="small text-muted">• +${order.items.length - 2} more item${order.items.length - 2 > 1 ? 's' : ''}</div>`;
@@ -360,18 +363,26 @@ function showOrderDetails(orderId) {
 
     let itemsHtml = '';
     if (order.items && Array.isArray(order.items)) {
-        itemsHtml = order.items.map(item => `
-            <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
-                <div>
-                    <h6 class="mb-0">${item.product_name || item.name || 'Product'}</h6>
-                    <small class="text-muted">Quantity: ${item.quantity || 1}</small>
+        itemsHtml = order.items.map(item => {
+            // Try multiple property names for product details
+            const productName = item.product_name || item.name || `Product ID: ${item.product_id || item.id || 'Unknown'}`;
+            const quantity = item.quantity || 1;
+            const unitPrice = parseFloat(item.price || item.unit_price || item.item_price || 0);
+            const totalPrice = unitPrice * quantity;
+
+            return `
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                    <div>
+                        <h6 class="mb-0">${productName}</h6>
+                        <small class="text-muted">Quantity: ${quantity}</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold">$${totalPrice.toFixed(2)}</div>
+                        <small class="text-muted">$${unitPrice.toFixed(2)} each</small>
+                    </div>
                 </div>
-                <div class="text-end">
-                    <div class="fw-bold">$${(parseFloat(item.price || item.unit_price || 0) * (item.quantity || 1)).toFixed(2)}</div>
-                    <small class="text-muted">$${parseFloat(item.price || item.unit_price || 0).toFixed(2)} each</small>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     modalDetailsEl.innerHTML = `
@@ -417,9 +428,11 @@ function showReorderModal(orderId) {
 
     const reorderItemsEl = document.getElementById('reorder-items');
     if (reorderItemsEl) {
-        reorderItemsEl.innerHTML = order.items.map(item =>
-            `<div>• ${item.product_name || item.name || 'Product'} (x${item.quantity || 1})</div>`
-        ).join('');
+        reorderItemsEl.innerHTML = order.items.map(item => {
+            const productName = item.product_name || item.name || `Product ID: ${item.product_id || item.id || 'Unknown'}`;
+            const quantity = item.quantity || 1;
+            return `<div>• ${productName} (x${quantity})</div>`;
+        }).join('');
     }
 
     const modal = document.getElementById('reorderModal');

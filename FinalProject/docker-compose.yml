@@ -169,6 +169,7 @@ services:
       - CUSTOMER_URL=http://customer-service:8003
       - CART_URL=http://cart-service:8004
       - PRODUCTS_URL=http://products-service:8005
+      - WISHLIST_URL=http://wishlist-service:8006
 
 volumes:
   db-data:
