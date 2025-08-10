@@ -11,7 +11,9 @@ from pydantic import BaseModel, EmailStr
 router = APIRouter(prefix="/customers")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Create a customer
+# POST /customers/create-user — Creates a new customer account
+# Validates email uniqueness, creates Customer record with provided details
+# Returns created customer data or raises 400 error if email already exists
 @router.post("/create-user", response_model=CustomerOut, status_code=201)
 def create_customer(payload: CustomerCreate, db: Session = Depends(get_db)):
     existing = db.query(Customer).filter(Customer.email_address == payload.email_address).first()
@@ -20,7 +22,7 @@ def create_customer(payload: CustomerCreate, db: Session = Depends(get_db)):
 
     new_customer = Customer(
         email_address=payload.email_address,
-        password=payload.password,  # or hash here if not done in auth-service
+        password=payload.password,
         first_name=payload.first_name,
         last_name=payload.last_name
     )
@@ -30,11 +32,16 @@ def create_customer(payload: CustomerCreate, db: Session = Depends(get_db)):
     return new_customer
 
 
-# Read all customers
+# GET /customers/ — Retrieves all customer records from the database
+# Returns complete list of customers with public-facing customer information
+# Used for administrative purposes to view all registered customers
 @router.get("/", response_model=list[CustomerOut])
 def get_customers(db: Session = Depends(get_db)):
     return db.query(Customer).all()
 
+# GET /customers/by-email — Finds customer by email address for authentication
+# Returns CustomerAuth schema with password for auth-service verification
+# Raises 404 error if customer with specified email doesn't exist
 @router.get("/by-email", response_model=CustomerAuth)
 def get_customer_by_email(email_address: EmailStr, db: Session = Depends(get_db)):
     customer = db.query(Customer).filter(Customer.email_address == email_address).first()
@@ -42,7 +49,9 @@ def get_customer_by_email(email_address: EmailStr, db: Session = Depends(get_db)
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
 
-# Read single customer by ID
+# GET /customers/{customer_id} — Retrieves specific customer by ID
+# Returns customer details for the specified customer ID
+# Raises 404 error if customer doesn't exist
 @router.get("/{customer_id}", response_model=CustomerOut)
 def get_customer(customer_id: int, db: Session = Depends(get_db)):
     customer = db.query(Customer).get(customer_id)
@@ -50,7 +59,9 @@ def get_customer(customer_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
     return customer
 
-# Update customer
+# PUT /customers/{customer_id} — Updates existing customer information
+# Accepts partial updates through CustomerUpdate schema, only modifies provided fields
+# Returns updated customer data or raises 404 if customer doesn't exist
 @router.put("/{customer_id}", response_model=CustomerOut)
 def update_customer(customer_id: int, customer_update: CustomerUpdate, db: Session = Depends(get_db)):
     customer = db.query(Customer).get(customer_id)
@@ -62,7 +73,9 @@ def update_customer(customer_id: int, customer_update: CustomerUpdate, db: Sessi
     db.refresh(customer)
     return customer
 
-# Delete customer
+# DELETE /customers/{customer_id} — Removes customer account from database
+# Permanently deletes customer record for the specified ID
+# Returns 204 status on success or 404 if customer doesn't exist
 @router.delete("/{customer_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     customer = db.query(Customer).get(customer_id)
@@ -70,5 +83,3 @@ def delete_customer(customer_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found")
     db.delete(customer)
     db.commit()
-
-

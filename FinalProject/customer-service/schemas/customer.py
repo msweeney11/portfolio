@@ -4,7 +4,7 @@ from typing import Optional
 # Shared base for reusable fields
 class CustomerBase(BaseModel):
     email_address: EmailStr
-    password: constr(min_length=8)  # Consider hashing this before storing
+    password: constr(min_length=8)
     first_name: constr(max_length=50)
     last_name: constr(max_length=50)
     shipping_address_id: Optional[int] = None

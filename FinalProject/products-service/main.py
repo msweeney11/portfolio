@@ -17,6 +17,8 @@ app.add_middleware(
 app.include_router(products.router, prefix="/products", tags=["Products"])
 app.include_router(categories.router, prefix="/categories", tags=["Categories"])
 
+# GET /health — Health check endpoint for service monitoring
+# Returns service name and status to verify the products service is operational
 @app.get("/health")
 def health_check():
     return {"service": "products-service", "status": "healthy"}

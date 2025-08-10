@@ -13,7 +13,7 @@ class Product(Base):
     list_price = Column(Numeric(10, 2), nullable=False)
     discount_percent = Column(Numeric(10, 2), default=0.0)
     date_added = Column(DateTime)
-    image_url = Column(String(500))  # Make sure this line exists
+    image_url = Column(String(500))
 
     # Relationship to category
     category = relationship("Category", back_populates="products")

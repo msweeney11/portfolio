@@ -6,6 +6,9 @@ from schemas import CategoryCreate, CategoryOut
 router = APIRouter()
 
 
+# POST /categories/ — Creates a new product category
+# Validates category name uniqueness and creates Category record
+# Returns created category or raises 400 error if name already exists
 @router.post("/", response_model=CategoryOut, status_code=status.HTTP_201_CREATED)
 async def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
   # Check if category name already exists
@@ -20,12 +23,17 @@ async def create_category(category: CategoryCreate, db: Session = Depends(get_db
   return new_category
 
 
-# Fix the route - remove trailing slash to avoid redirect
+# GET /categories/ — Retrieves all product categories from the database
+# Returns complete list of categories for product organization and filtering
+# Used by admin interface and product browsing functionality
 @router.get("/", response_model=list[CategoryOut])
 async def get_categories(db: Session = Depends(get_db)):
   return db.query(Category).all()
 
 
+# GET /categories/{category_id} — Retrieves specific category by ID
+# Returns category details for the specified category ID
+# Raises 404 error if category doesn't exist
 @router.get("/{category_id}", response_model=CategoryOut)
 async def get_category(category_id: int, db: Session = Depends(get_db)):
   category = db.query(Category).filter(Category.category_id == category_id).first()

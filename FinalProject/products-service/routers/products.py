@@ -9,11 +9,17 @@ import uuid
 router = APIRouter()
 
 
+# Generates a unique 8-character product code using UUID
+# Returns uppercase string that serves as unique identifier for products
+# Used when product code is not provided during product creation
 def generate_product_code():
   """Generate a unique product code"""
   return str(uuid.uuid4())[:8].upper()
 
 
+# POST /products/ — Creates a new product with validation and auto-generated code
+# Validates category exists, generates unique product code if not provided
+# Creates Product record with current timestamp and returns product with category details
 @router.post("/", response_model=ProductOut, status_code=status.HTTP_201_CREATED)
 async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
   # Check if category exists
@@ -50,7 +56,9 @@ async def create_product(product: ProductCreate, db: Session = Depends(get_db)):
   return product_with_category
 
 
-# Fix the route - remove trailing slash to avoid redirect
+# GET /products/ — Retrieves products with optional filtering and pagination
+# Supports filtering by category, search terms, price range with skip/limit pagination
+# Returns products with category details loaded for comprehensive product information
 @router.get("", response_model=list[ProductOut])  # no slash
 @router.get("/", response_model=list[ProductOut])  # slash version
 async def get_products(
@@ -82,6 +90,9 @@ async def get_products(
   return query.offset(skip).limit(limit).all()
 
 
+# GET /products/{product_id} — Retrieves specific product by ID with category details
+# Returns complete product information including associated category
+# Raises 404 error if product doesn't exist
 @router.get("/{product_id}", response_model=ProductOut)
 async def get_product(product_id: int, db: Session = Depends(get_db)):
   product = db.query(Product).options(joinedload(Product.category)).filter(Product.product_id == product_id).first()
@@ -90,6 +101,9 @@ async def get_product(product_id: int, db: Session = Depends(get_db)):
   return product
 
 
+# PUT /products/{product_id} — Updates existing product with validation
+# Validates category and product code uniqueness if being updated
+# Returns updated product with category details or raises appropriate errors
 @router.put("/{product_id}", response_model=ProductOut)
 async def update_product(product_id: int, product_update: ProductUpdate, db: Session = Depends(get_db)):
   product = db.query(Product).filter(Product.product_id == product_id).first()
@@ -123,6 +137,9 @@ async def update_product(product_id: int, product_update: ProductUpdate, db: Ses
   return product_with_category
 
 
+# DELETE /products/{product_id} — Removes product from database
+# Deletes product record permanently from the database
+# Returns 204 status on success or 404 if product doesn't exist
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(product_id: int, db: Session = Depends(get_db)):
   product = db.query(Product).filter(Product.product_id == product_id).first()

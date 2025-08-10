@@ -16,6 +16,10 @@ ALLOWED_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.webp'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
 
+# POST / — Handles image file uploads with validation and storage
+# Validates file type against allowed extensions, checks file size limits,
+# generates unique filename using UUID, saves file to uploads directory,
+# and returns metadata including the accessible URL path
 @router.post("/")
 async def upload_image(file: UploadFile = File(...)):
   # Validate file type

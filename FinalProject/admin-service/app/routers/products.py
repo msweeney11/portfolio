@@ -21,6 +21,9 @@ class ProductCreate(BaseModel):
   image_url: Optional[str] = None
 
 
+# GET / — Retrieves all products from the products-service
+# Makes HTTP request to products-service and returns the complete product list
+# Includes comprehensive error handling for connection and service failures
 @router.get("/")
 async def get_products():
   try:
@@ -47,6 +50,9 @@ async def get_products():
     raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
+# POST / — Creates a new product via the products-service
+# Accepts ProductCreate model, forwards request to products-service with JSON payload
+# Returns created product data on success or detailed error information on failure
 @router.post("/")
 async def create_product(product: ProductCreate):
   try:
@@ -82,6 +88,9 @@ async def create_product(product: ProductCreate):
     raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
+# PUT /{product_id} — Updates an existing product in the products-service
+# Takes product ID from URL path and ProductCreate model from request body
+# Forwards update request to products-service and returns updated product data
 @router.put("/{product_id}")
 async def update_product(product_id: int, product: ProductCreate):
   try:
@@ -117,6 +126,9 @@ async def update_product(product_id: int, product: ProductCreate):
     raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
+# DELETE /{product_id} — Removes a product from the products-service
+# Takes product ID from URL path and sends delete request to products-service
+# Returns success message on 204 status or raises HTTPException on failure
 @router.delete("/{product_id}")
 async def delete_product(product_id: int):
   try:
@@ -142,6 +154,9 @@ async def delete_product(product_id: int):
     raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
+# GET /categories — Fetches all product categories from the products-service
+# Makes HTTP request to retrieve category list for product categorization
+# Returns categories array or handles errors with appropriate HTTP status codes
 @router.get("/categories")
 async def get_categories():
   try:
