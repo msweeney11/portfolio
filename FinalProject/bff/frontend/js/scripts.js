@@ -38,7 +38,7 @@ async function isLoggedIn() {
           email: userData.email,
           first_name: userData.first_name || userData.email.split('@')[0],
           last_name: userData.last_name || '',
-          customer_id: userData.customer_id || null
+          customer_id: userData.customer_id
         };
       }
       return true;
@@ -83,7 +83,19 @@ async function initializePage() {
     updateNavigation();
     updateCartBadge();
     updateWishlistBadge();
+
+    // Dispatch event to let other scripts know auth is ready
+    const authReadyEvent = new CustomEvent('authReady', {
+        detail: {
+            loggedIn: loggedIn,
+            currentUser: currentUser,
+            customerId: getCurrentCustomerId()
+        }
+    });
+    document.dispatchEvent(authReadyEvent);
+    console.log("Auth ready event dispatched");
 }
+
 
 // Navigation update - THIS IS THE KEY FUNCTION
 function updateNavigation() {
@@ -529,27 +541,106 @@ async function removeFromCart(id) {
 }
 
 // Other functions
+// Replace the existing loadWishlist function in scripts.js with this fixed version:
+
 async function loadWishlist() {
-  await requireLogin();
   try {
-    const res = await fetch('/api/wishlist', { credentials: 'include' });
-    const wishlist = await res.json();
+    const customerId = getCurrentCustomerId();
+    if (!customerId) {
+      console.error('No customer ID found for wishlist');
+      showNotification('Please log in to view your wishlist', 'warning');
+      displayEmptyWishlistInScripts();
+      return;
+    }
+
+    console.log('Loading wishlist for customer:', customerId);
+
+    const res = await fetch(`/api/wishlist/customer/${customerId}`, {
+      credentials: 'include',
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+
+    console.log('Wishlist API response status:', res.status);
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        // Customer not found or empty wishlist
+        console.log('Wishlist not found or empty');
+        displayEmptyWishlistInScripts();
+        return;
+      }
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    const wishlistData = await res.json();
+    console.log('Wishlist data:', wishlistData);
+
+    // Ensure we have an array - the API should return an array of wishlist items
+    const wishlist = Array.isArray(wishlistData) ? wishlistData : [];
+
     const container = document.getElementById('wishlist-items');
     if (container) {
       container.innerHTML = '';
+
+      if (wishlist.length === 0) {
+        displayEmptyWishlistInScripts();
+        return;
+      }
+
       wishlist.forEach(item => {
+        const product = item.product || {};
         const card = document.createElement('div');
-        card.className = 'wishlist-card';
+        card.className = 'col-md-6 col-lg-4 mb-4';
         card.innerHTML = `
-          <img src="${item.product.image}" alt="${item.product.name}">
-          <h3>${item.product.name}</h3>
-          <button onclick="removeFromWishlist(${item.id})">Remove</button>
+          <div class="card h-100 shadow-sm">
+            <img src="${product.image_url || 'https://dummyimage.com/300x200/dee2e6/6c757d.jpg'}"
+                 class="card-img-top"
+                 alt="${product.product_name || 'Product'}"
+                 style="height: 200px; object-fit: cover;">
+            <div class="card-body">
+              <h5 class="card-title">${product.product_name || 'Unknown Product'}</h5>
+              <p class="card-text">${product.description || 'No description available'}</p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fs-5 fw-bold text-primary">$${product.list_price || '0.00'}</span>
+                <div class="btn-group" role="group">
+                  <button class="btn btn-outline-primary btn-sm" onclick="addToCart(${item.product_id})">
+                    <i class="bi bi-cart-plus"></i>
+                  </button>
+                  <button class="btn btn-outline-danger btn-sm" onclick="removeFromWishlist(${item.id})">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         `;
         container.appendChild(card);
       });
     }
   } catch (err) {
     console.error('Failed to load wishlist:', err);
+    showNotification('Failed to load wishlist: ' + err.message, 'error');
+    displayEmptyWishlistInScripts();
+  }
+}
+
+function displayEmptyWishlistInScripts() {
+  const container = document.getElementById('wishlist-items');
+  if (container) {
+    container.innerHTML = `
+      <div class="col-12">
+        <div class="text-center py-5">
+          <i class="bi bi-heart display-1 text-muted mb-3"></i>
+          <h3 class="text-muted">Your wishlist is empty</h3>
+          <p class="text-muted">Start adding products you love!</p>
+          <a href="index.html" class="btn btn-primary">
+            <i class="bi bi-shop me-1"></i>Continue Shopping
+          </a>
+        </div>
+      </div>
+    `;
   }
 }
 
@@ -747,17 +838,22 @@ async function logout() {
 
 // Utility functions
 function getCurrentCustomerId() {
-    if (currentUser && currentUser.customer_id) {
-        return currentUser.customer_id;
-    }
-
+    // Check cookies first since we know this works
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
         const [name, value] = cookie.trim().split('=');
         if (name === 'customer_id') {
-            return parseInt(value);
+            const cookieCustomerId = parseInt(value);
+            console.log("Customer ID from cookie:", cookieCustomerId);
+            return cookieCustomerId;
         }
     }
+
+    // Fallback to currentUser
+    if (currentUser && currentUser.customer_id) {
+        return currentUser.customer_id;
+    }
+
     return null;
 }
 
@@ -1187,3 +1283,4 @@ window.changeQuantity = changeQuantity;
 window.showProductModal = showProductModal;
 window.addToCartFromModal = addToCartFromModal;
 window.addToWishlistFromModal = addToWishlistFromModal;
+window.currentUser = currentUser;
