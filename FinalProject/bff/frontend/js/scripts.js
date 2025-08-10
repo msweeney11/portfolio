@@ -5,7 +5,6 @@ let currentUser = null;
 let allProducts = [];
 let currentProduct = null;
 let cart = JSON.parse(localStorage.getItem('phonehub_cart')) || [];
-let wishlist = JSON.parse(localStorage.getItem('phonehub_wishlist')) || [];
 
 // Utility: Get query parameters
 function getQueryParam(param) {
@@ -493,40 +492,100 @@ function saveCart() {
 }
 
 // Wishlist functions
-function quickAddToWishlist(productId, productName) {
+async function quickAddToWishlist(productId, productName) {
     if (!currentUser) {
         showNotification('Please log in to save items to your wishlist', 'warning');
         return;
     }
 
-    const existingItem = wishlist.find(item => item.productId === productId);
-
-    if (existingItem) {
-        showNotification('Item already in wishlist', 'info');
+    const customerId = getCurrentCustomerId();
+    if (!customerId) {
+        showNotification('Please log in to save items to your wishlist', 'warning');
         return;
     }
 
-    wishlist.push({
-        productId: productId,
-        name: productName,
-        addedAt: new Date().toISOString()
-    });
+    try {
+        const response = await fetch('http://localhost:8006/wishlist/', {  // Direct to wishlist service
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                customer_id: customerId,
+                product_id: productId
+            })
+        });
 
-    saveWishlist();
-    updateWishlistBadge();
-    showNotification(`${productName} added to wishlist!`, 'success');
+        if (response.ok) {
+            showNotification(`${productName} added to wishlist!`, 'success');
+            await updateWishlistBadge(); // Update the badge after adding
+        } else if (response.status === 400) {
+            const errorData = await response.text();
+            if (errorData.includes('already in wishlist')) {
+                showNotification('Item already in wishlist', 'info');
+            } else {
+                showNotification('Failed to add item to wishlist', 'error');
+            }
+        } else {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error adding to wishlist:', error);
+        showNotification('Failed to add item to wishlist: ' + error.message, 'error');
+    }
 }
 
-function saveWishlist() {
-    localStorage.setItem('phonehub_wishlist', JSON.stringify(wishlist));
-}
+// Replace the existing updateWishlistBadge function with this:
+async function updateWishlistBadge() {
+    const wishlistBadges = document.querySelectorAll('.wishlist-badge, .wishlist-count');
 
-function updateWishlistBadge() {
-    const wishlistBadges = document.querySelectorAll('.wishlist-badge');
-    wishlistBadges.forEach(badge => {
-        badge.textContent = wishlist.length;
-        badge.style.display = wishlist.length > 0 ? 'inline' : 'none';
-    });
+    if (!currentUser) {
+        // If not logged in, hide the badge
+        wishlistBadges.forEach(badge => {
+            badge.textContent = '0';
+            badge.style.display = 'none';
+        });
+        return;
+    }
+
+    try {
+        const customerId = getCurrentCustomerId();
+        if (!customerId) {
+            wishlistBadges.forEach(badge => {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            });
+            return;
+        }
+
+        // Use the direct wishlist service port and the count endpoint
+        const response = await fetch(`http://localhost:8006/wishlist/customer/${customerId}/count`, {
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const count = data.count || 0;
+
+            wishlistBadges.forEach(badge => {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'inline' : 'none';
+            });
+        } else {
+            console.error('Failed to get wishlist count:', response.status);
+            wishlistBadges.forEach(badge => {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            });
+        }
+    } catch (error) {
+        console.error('Error updating wishlist badge:', error);
+        wishlistBadges.forEach(badge => {
+            badge.textContent = '0';
+            badge.style.display = 'none';
+        });
+    }
 }
 
 // Remove item from cart
@@ -555,7 +614,7 @@ async function loadWishlist() {
 
     console.log('Loading wishlist for customer:', customerId);
 
-    const res = await fetch(`/api/wishlist/customer/${customerId}`, {
+    const res = await fetch('http://localhost:8006/wishlist/customer/${customerId}', {
       credentials: 'include',
       headers: {
         'Accept': 'application/json'
@@ -644,13 +703,36 @@ function displayEmptyWishlistInScripts() {
   }
 }
 
-async function removeFromWishlist(id) {
-  try {
-    await fetch(`/api/wishlist/${id}`, { method: 'DELETE', credentials: 'include' });
-    location.reload();
-  } catch (err) {
-    console.error('Failed to remove from wishlist:', err);
-  }
+async function removeFromWishlist(itemId) {
+    if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8006/wishlist/${itemId}', {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            showNotification('Item removed from wishlist', 'success');
+            // Reload the wishlist page if we're on it
+            if (window.location.pathname.includes('wishlist')) {
+                if (typeof loadWishlist === 'function') {
+                    await loadWishlist();
+                } else {
+                    location.reload();
+                }
+            }
+            await updateWishlistBadge();
+        } else {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to remove item');
+        }
+    } catch (error) {
+        console.error('Error removing from wishlist:', error);
+        showNotification('Failed to remove item from wishlist: ' + error.message, 'error');
+    }
 }
 
 async function handleCheckout(e) {
