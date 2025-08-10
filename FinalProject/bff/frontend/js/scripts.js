@@ -172,7 +172,7 @@ async function loadProducts() {
         card.innerHTML = `
           <div class="card h-100 shadow-sm product-card">
             <div class="position-relative">
-              <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="${p.product_name}" />
+              <img class="card-img-top" src="${p.image_url || 'https://dummyimage.com/450x300/dee2e6/6c757d.jpg'}" alt="${p.product_name}" />
               ${p.discount_percent > 0 ?
                 `<span class="position-absolute top-0 end-0 badge bg-danger m-2">
                     -${p.discount_percent}%
