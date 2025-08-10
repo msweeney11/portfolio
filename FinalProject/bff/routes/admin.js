@@ -4,7 +4,9 @@ import multer from "multer";
 const upload = multer({ dest: "uploads/" });
 const router = express.Router();
 
-// Get all products
+// GET /api/admin/products — Retrieves all products from admin service
+// Forwards request to admin-service and returns product list
+// Used by admin interface for product management
 router.get("/products", async (req, res, next) => {
   try {
     const response = await fetch("http://admin-service:8000/admin/products/");
@@ -19,7 +21,9 @@ router.get("/products", async (req, res, next) => {
   }
 });
 
-// Create product
+// POST /api/admin/products — Creates new product via admin service
+// Forwards product creation request with JSON payload
+// Returns created product data or error details
 router.post("/products", async (req, res, next) => {
   try {
     const productData = req.body;
@@ -41,7 +45,9 @@ router.post("/products", async (req, res, next) => {
   }
 });
 
-// Delete product
+// DELETE /api/admin/products/:id — Deletes product via admin service
+// Forwards delete request to admin service for specified product ID
+// Returns success message or error details
 router.delete("/products/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -60,7 +66,9 @@ router.delete("/products/:id", async (req, res, next) => {
   }
 });
 
-// Upload image
+// POST /api/admin/uploads — Handles file uploads to admin service
+// Processes multipart file upload and forwards to admin service
+// Returns uploaded file information including accessible URL
 router.post("/uploads", upload.single("file"), async (req, res, next) => {
   try {
     const formData = new FormData();

@@ -2,6 +2,9 @@ import express from 'express';
 const router = express.Router();
 const CART_SERVICE_URL = 'http://cart-service:8004';
 
+// GET /api/cart-items — Retrieves cart items from cart service
+// Forwards request with cookies to cart service for customer identification
+// Returns cart items data or 500 error on service failure
 router.get('/', async (req, res) => {
   try {
     const cartRes = await fetch(`${CART_SERVICE_URL}/cart-items`, {
@@ -15,6 +18,9 @@ router.get('/', async (req, res) => {
   }
 });
 
+// POST /api/cart-items — Adds item to cart via cart service
+// Forwards item data and cookies to cart service for processing
+// Returns created cart item or 500 error on service failure
 router.post('/', async (req, res) => {
   try {
     const cartRes = await fetch(`${CART_SERVICE_URL}/cart-items`, {
@@ -33,6 +39,9 @@ router.post('/', async (req, res) => {
   }
 });
 
+// DELETE /api/cart-items/:id — Removes item from cart via cart service
+// Forwards delete request with item ID and cookies to cart service
+// Returns deletion confirmation or 500 error on service failure
 router.delete('/:id', async (req, res) => {
   try {
     const cartRes = await fetch(`${CART_SERVICE_URL}/cart-items/${req.params.id}`, {
@@ -48,4 +57,3 @@ router.delete('/:id', async (req, res) => {
 });
 
 export default router;
-

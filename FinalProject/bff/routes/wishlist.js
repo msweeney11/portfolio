@@ -4,7 +4,9 @@ import { verifySession } from "../middleware/sessionChecker.js";
 const router = express.Router();
 const WISHLIST_SERVICE_URL = process.env.WISHLIST_URL || "http://wishlist-service:8008";
 
-// Add item to wishlist
+// POST /api/wishlist — Adds item to customer's wishlist (protected route)
+// Requires session verification, validates required fields, forwards to wishlist service
+// Returns created wishlist item with product details or error information
 router.post("/", verifySession, async (req, res, next) => {
   try {
     const { customer_id, product_id } = req.body;
@@ -32,7 +34,9 @@ router.post("/", verifySession, async (req, res, next) => {
   }
 });
 
-// Get customer's wishlist
+// GET /api/wishlist/customer/:customerId — Retrieves customer's complete wishlist
+// Forwards customer ID to wishlist service for customer-specific wishlist retrieval
+// Returns wishlist items with product details or error on service failure
 router.get("/customer/:customerId", async (req, res, next) => {
   try {
     const customerId = req.params.customerId;
@@ -50,7 +54,9 @@ router.get("/customer/:customerId", async (req, res, next) => {
   }
 });
 
-// Get wishlist count
+// GET /api/wishlist/customer/:customerId/count — Gets wishlist item count for customer
+// Forwards customer ID to wishlist service for count retrieval
+// Returns count object or error on service failure
 router.get("/customer/:customerId/count", async (req, res, next) => {
   try {
     const customerId = req.params.customerId;
@@ -68,7 +74,9 @@ router.get("/customer/:customerId/count", async (req, res, next) => {
   }
 });
 
-// Remove item from wishlist by item ID
+// DELETE /api/wishlist/:itemId — Removes specific wishlist item by ID (protected route)
+// Requires session verification, forwards item ID to wishlist service
+// Returns success message or error on deletion failure
 router.delete("/:itemId", verifySession, async (req, res, next) => {
   try {
     const itemId = req.params.itemId;
@@ -87,7 +95,9 @@ router.delete("/:itemId", verifySession, async (req, res, next) => {
   }
 });
 
-// Remove item from wishlist by customer and product ID
+// DELETE /api/wishlist/customer/:customerId/product/:productId — Removes product from wishlist (protected route)
+// Requires session verification, uses customer and product IDs for specific removal
+// Returns success message or error on deletion failure
 router.delete("/customer/:customerId/product/:productId", verifySession, async (req, res, next) => {
   try {
     const { customerId, productId } = req.params;
@@ -106,7 +116,9 @@ router.delete("/customer/:customerId/product/:productId", verifySession, async (
   }
 });
 
-// Clear entire wishlist
+// DELETE /api/wishlist/customer/:customerId/clear — Clears entire customer wishlist (protected route)
+// Requires session verification, removes all items from customer's wishlist
+// Returns success message or error on clear operation failure
 router.delete("/customer/:customerId/clear", verifySession, async (req, res, next) => {
   try {
     const customerId = req.params.customerId;

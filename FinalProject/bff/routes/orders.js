@@ -4,7 +4,9 @@ import { verifySession } from "../middleware/sessionChecker.js";
 const router = express.Router();
 const ORDER_SERVICE_URL = process.env.ORDER_URL || "http://order-service:8004";
 
-// Create new order
+// POST /api/orders — Creates new order via order service (protected route)
+// Requires session verification, forwards order data to order service
+// Returns created order with 201 status or error details
 router.post("/", verifySession, async (req, res, next) => {
   try {
     const orderData = req.body;
@@ -27,7 +29,9 @@ router.post("/", verifySession, async (req, res, next) => {
   }
 });
 
-// Get orders (optionally filtered by customer)
+// GET /api/orders — Retrieves orders with optional query parameters
+// Supports filtering via query parameters, forwards to order service
+// Returns orders list or error message on service failure
 router.get("/", async (req, res, next) => {
   try {
     const queryParams = new URLSearchParams(req.query).toString();
@@ -46,7 +50,9 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// Get single order
+// GET /api/orders/:id — Retrieves specific order by ID
+// Forwards request to order service with order ID
+// Returns order details, 404 if not found, or error on service failure
 router.get("/:id", async (req, res, next) => {
   try {
     const orderId = req.params.id;
@@ -66,7 +72,9 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-// Get customer orders
+// GET /api/orders/customer/:customerId — Retrieves orders for specific customer
+// Forwards customer ID to order service for customer-specific order retrieval
+// Returns customer orders list or error on service failure
 router.get("/customer/:customerId", async (req, res, next) => {
   try {
     const customerId = req.params.customerId;
@@ -84,7 +92,9 @@ router.get("/customer/:customerId", async (req, res, next) => {
   }
 });
 
-// Update order
+// PUT /api/orders/:id — Updates existing order (protected route)
+// Requires session verification, forwards update data to order service
+// Returns updated order details or error information
 router.put("/:id", verifySession, async (req, res, next) => {
   try {
     const orderId = req.params.id;

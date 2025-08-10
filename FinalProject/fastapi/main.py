@@ -16,10 +16,14 @@ app.add_middleware(
 app.include_router(products.router)
 app.include_router(orders.router)
 
+# GET / — Root endpoint that returns basic service information
+# Provides confirmation that the FastAPI service is operational
 @app.get("/")
 def read_root():
     return {"message": "FastAPI service is working!"}
 
+# GET /health — Health check endpoint for service monitoring
+# Returns service name and status to verify the FastAPI service is healthy
 @app.get("/health")
 def health_check():
     return {"service": "fastapi-main", "status": "healthy"}

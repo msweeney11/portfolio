@@ -1,8 +1,10 @@
 import express from "express";
-// Remove the node-fetch import if you don't want to install it
 import { loginUser, registerUser, verifyLogin } from "../services/fastapiClient.js";
 const router = express.Router();
 
+// POST /api/auth/login — Handles user authentication through auth service
+// Forwards credentials to auth-service, manually sets session cookies on success
+// Returns login confirmation or 401 error for invalid credentials
 router.post("/login", async (req, res, next) => {
   console.log("Login request received:", req.body);
   try {
@@ -51,7 +53,9 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-// Registration route (mostly unchanged but with cookie forwarding)
+// POST /api/auth/register — Handles new user registration through auth service
+// Forwards registration data to auth-service, handles cookie forwarding
+// Returns success message or 400 error for registration failures
 router.post("/register", async (req, res, next) => {
   console.log("Registration request received:", req.body);
   try {
@@ -64,7 +68,7 @@ router.post("/register", async (req, res, next) => {
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
-        email_address: email_address, // Changed from email to email_address
+        email_address: email_address,
         password: password,
         first_name: first_name,
         last_name: last_name
@@ -90,6 +94,9 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
+// POST /api/auth/logout — Handles user logout through auth service
+// Forwards logout request to auth-service and clears cookies locally
+// Ensures complete logout even if auth-service request fails
 router.post("/logout", async (req, res, next) => {
   console.log("BFF logout request received");
   try {
@@ -146,6 +153,9 @@ router.post("/logout", async (req, res, next) => {
   }
 });
 
+// GET /api/auth/verify — Verifies user session through auth service
+// Forwards cookies to auth-service for session validation
+// Returns user information if session is valid, error if not authenticated
 router.get("/verify", async (req, res) => {
   try {
     console.log("BFF verify - incoming cookies:", req.headers.cookie);

@@ -16,6 +16,9 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+# POST /auth/login — Authenticates customer credentials and creates session
+# Validates email/password against customer service, generates JWT token
+# Sets session and customer_id cookies, returns login confirmation with token data
 @router.post("/login")
 async def login_customer(login_data: LoginRequest):
     print("Login attempt:", login_data.email)
@@ -28,8 +31,8 @@ async def login_customer(login_data: LoginRequest):
 
     response = JSONResponse(content={
       "message": "Logged in",
-      "session_token": token,  # Add this
-      "customer_id": customer["customer_id"]  # Add this
+      "session_token": token,
+      "customer_id": customer["customer_id"]
     })
 
     set_session_cookie(response, token)
@@ -54,6 +57,9 @@ class RegisterRequest(BaseModel):
     first_name: str
     last_name: str
 
+# POST /auth/register — Registers new customer account with validation
+# Checks for existing email, hashes password, creates customer via customer service
+# Sets customer_id cookie on successful registration
 @router.post("/register")
 async def register_customer(payload: RegisterRequest, response: Response):  # Make async
     existing_customer = await fetch_customer_by_email(payload.email_address)  # Add await
@@ -85,12 +91,18 @@ async def register_customer(payload: RegisterRequest, response: Response):  # Ma
 
     return {"message": "Customer registered"}
 
+# Creates JWT access token with expiration time
+# Encodes customer data into secure token for session management
+# Default expiration is 1 hour, can be customized with expires_delta parameter
 def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=1)):
     to_encode = data.copy()
     to_encode["exp"] = datetime.utcnow() + expires_delta
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
+# POST /auth/logout — Clears authentication cookies to log out user
+# Removes session and customer_id cookies with multiple configurations
+# Ensures complete logout by clearing cookies with different path/domain settings
 @router.post("/logout")
 def logout_customer(response: Response):
   print("Logout request received")
@@ -126,6 +138,9 @@ def logout_customer(response: Response):
     status_code=200
   )
 
+# GET /auth/verify — Validates session token and returns user information
+# Decodes JWT token from session cookie, validates authenticity
+# Returns user email and customer_id if session is valid, raises 401 if invalid
 @router.get("/verify")
 def verify_session(
     session: str = Cookie(None),
@@ -148,6 +163,3 @@ def verify_session(
             "email": payload.get("sub"),
             "customer_id": customer_id
     }
-
-
-

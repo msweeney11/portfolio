@@ -3,7 +3,9 @@ import express from "express";
 const router = express.Router();
 const PRODUCTS_SERVICE_URL = process.env.PRODUCTS_URL || "http://products-service:8005";
 
-// Get all products - fixed to avoid redirects
+// GET /api/products — Retrieves products with optional filtering via query parameters
+// Forwards query parameters to products service, supports search and filtering
+// Returns products list with detailed logging for debugging
 router.get("/", async (req, res, next) => {
   try {
     const queryParams = new URLSearchParams(req.query).toString();
@@ -28,7 +30,9 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// Get single product by ID
+// GET /api/products/:id — Retrieves specific product by ID
+// Forwards product ID to products service for single product lookup
+// Returns product details, 404 if not found, or error with detailed logging
 router.get("/:id", async (req, res, next) => {
   try {
     const productId = req.params.id;
@@ -55,7 +59,9 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-// Get categories - using a different path to avoid conflicts
+// GET /api/products/categories/all — Retrieves all product categories
+// Uses specific path to avoid conflicts, forwards request to products service
+// Returns categories list with detailed logging for debugging
 router.get("/categories/all", async (req, res, next) => {
   try {
     const url = `${PRODUCTS_SERVICE_URL}/categories`;
@@ -70,12 +76,13 @@ router.get("/categories/all", async (req, res, next) => {
       console.error(`Products service responded with status: ${response.status}`);
       const errorText = await response.text();
       console.error(`Error details: ${errorText}`);
+      res.status(response.status).
       res.status(response.status).json({ error: "Failed to fetch categories", details: errorText });
     }
   } catch (err) {
     console.error("Error fetching categories:", err);
     next(err);
-  }
+    }
 });
 
 export default router;
