@@ -1,6 +1,6 @@
 const API_BASE = '/api';
-let currentProduct = null;
-let currentUser = null;
+
+// Only declare these if they don't exist (to avoid conflicts with scripts.js)
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeProductPage();
@@ -62,7 +62,7 @@ function displayProduct(product) {
 
     // Product image
     const mainImage = document.getElementById('product-main-image');
-    mainImage.src = `https://via.placeholder.com/400x400/007bff/ffffff?text=${encodeURIComponent(product.product_name.substring(0, 20))}`;
+    mainImage.src = product.image_url || `https://via.placeholder.com/400x400/007bff/ffffff?text=${encodeURIComponent(product.product_name.substring(0, 20))}`;
     mainImage.alt = product.product_name;
 
     // Category badge
@@ -166,8 +166,7 @@ function displayRelatedProducts(products) {
                 <div class="card h-100 shadow-sm" style="cursor: pointer;" onclick="viewProduct(${product.product_id})">
                     <div class="position-relative">
                         <img class="card-img-top"
-                             src="https://via.placeholder.com/200x150/007bff/ffffff?text=${encodeURIComponent(product.product_name.substring(0, 15))}"
-                             alt="${product.product_name}"
+                             src="${product.image_url || `https://via.placeholder.com/200x150/007bff/ffffff?text=${encodeURIComponent(product.product_name.substring(0, 15))}`}"                                alt="${product.product_name}"
                              style="height: 150px; object-fit: cover;" />
                         ${product.discount_percent > 0 ?
                             `<span class="position-absolute top-0 end-0 badge bg-danger m-2">
@@ -323,103 +322,112 @@ function getCurrentCustomerId() {
     return null;
 }
 
-function updateNavigation() {
-    const navUserSection = document.getElementById('navbar-user-section');
-    if (navUserSection && currentUser) {
-        const displayName = currentUser.first_name ||
-                           (currentUser.email ? currentUser.email.split('@')[0] : 'User');
+// Only define these functions if they don't exist (to avoid conflicts with scripts.js)
+if (typeof updateNavigation !== 'function') {
+    function updateNavigation() {
+        const navUserSection = document.getElementById('navbar-user-section');
+        if (navUserSection && currentUser) {
+            const displayName = currentUser.first_name ||
+                               (currentUser.email ? currentUser.email.split('@')[0] : 'User');
 
-        navUserSection.innerHTML = `
-            <a href="cart.html" class="btn btn-outline-primary position-relative me-2">
-                <i class="bi bi-cart me-1"></i>Cart
-                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-badge">
-                    0
-                </span>
-            </a>
-            <div class="dropdown">
-                <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    <i class="bi bi-person-circle me-1"></i>${displayName}
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="profile.html">
-                        <i class="bi bi-person-circle me-2"></i>My Profile
-                    </a></li>
-                    <li><a class="dropdown-item" href="orders.html">
-                        <i class="bi bi-box-seam me-2"></i>My Orders
-                    </a></li>
-                    <li><a class="dropdown-item" href="wishlist.html">
-                        <i class="bi bi-heart me-2"></i>Wishlist
-                    </a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
-                        <i class="bi bi-box-arrow-right me-2"></i>Logout
-                    </a></li>
-                </ul>
+            navUserSection.innerHTML = `
+                <a href="cart.html" class="btn btn-outline-primary position-relative me-2">
+                    <i class="bi bi-cart me-1"></i>Cart
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-badge">
+                        0
+                    </span>
+                </a>
+                <div class="dropdown">
+                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle me-1"></i>${displayName}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="profile.html">
+                            <i class="bi bi-person-circle me-2"></i>My Profile
+                        </a></li>
+                        <li><a class="dropdown-item" href="orders.html">
+                            <i class="bi bi-box-seam me-2"></i>My Orders
+                        </a></li>
+                        <li><a class="dropdown-item" href="wishlist.html">
+                            <i class="bi bi-heart me-2"></i>Wishlist
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </a></li>
+                    </ul>
+                </div>
+            `;
+
+            // Update cart badge
+            updateCartBadge();
+        } else {
+            navUserSection.innerHTML = `
+                <a href="login.html" class="btn btn-outline-primary me-2">
+                    <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                </a>
+                <a href="register.html" class="btn btn-primary">
+                    <i class="bi bi-person-plus me-1"></i>Register
+                </a>
+            `;
+        }
+    }
+}
+
+if (typeof updateCartBadge !== 'function') {
+    function updateCartBadge() {
+        const cart = JSON.parse(localStorage.getItem('phonehub_cart')) || [];
+        const cartBadge = document.getElementById('cart-badge');
+        if (cartBadge) {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartBadge.textContent = totalItems;
+            cartBadge.style.display = totalItems > 0 ? 'inline' : 'none';
+        }
+    }
+}
+
+if (typeof logout !== 'function') {
+    async function logout() {
+        try {
+            document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            document.cookie = 'customer_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            localStorage.removeItem('phonehub_cart');
+            localStorage.removeItem('phonehub_wishlist');
+            currentUser = null;
+            updateNavigation();
+            showNotification('Logged out successfully', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        } catch (error) {
+            console.error('Logout error:', error);
+            window.location.href = 'index.html';
+        }
+    }
+}
+
+if (typeof showNotification !== 'function') {
+    function showNotification(message, type = 'info') {
+        const existingNotifications = document.querySelectorAll('.phonehub-notification');
+        existingNotifications.forEach(notification => notification.remove());
+
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show position-fixed phonehub-notification`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px;';
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
+                <div class="flex-grow-1">${message}</div>
+                <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         `;
 
-        // Update cart badge
-        updateCartBadge();
-    } else {
-        navUserSection.innerHTML = `
-            <a href="login.html" class="btn btn-outline-primary me-2">
-                <i class="bi bi-box-arrow-in-right me-1"></i>Login
-            </a>
-            <a href="register.html" class="btn btn-primary">
-                <i class="bi bi-person-plus me-1"></i>Register
-            </a>
-        `;
-    }
-}
+        document.body.appendChild(notification);
 
-function updateCartBadge() {
-    const cart = JSON.parse(localStorage.getItem('phonehub_cart')) || [];
-    const cartBadge = document.getElementById('cart-badge');
-    if (cartBadge) {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        cartBadge.textContent = totalItems;
-        cartBadge.style.display = totalItems > 0 ? 'inline' : 'none';
-    }
-}
-
-async function logout() {
-    try {
-        document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        document.cookie = 'customer_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-        localStorage.removeItem('phonehub_cart');
-        localStorage.removeItem('phonehub_wishlist');
-        currentUser = null;
-        updateNavigation();
-        showNotification('Logged out successfully', 'success');
         setTimeout(() => {
-            window.location.href = 'index.html';
-        }, 1000);
-    } catch (error) {
-        console.error('Logout error:', error);
-        window.location.href = 'index.html';
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 5000);
     }
-}
-
-function showNotification(message, type = 'info') {
-    const existingNotifications = document.querySelectorAll('.phonehub-notification');
-    existingNotifications.forEach(notification => notification.remove());
-
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'info'} alert-dismissible fade show position-fixed phonehub-notification`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; max-width: 400px;';
-    notification.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="bi bi-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'} me-2"></i>
-            <div class="flex-grow-1">${message}</div>
-            <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    `;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    }, 5000);
 }
