@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Form, Response, Cookie
+from fastapi import APIRouter, Depends, HTTPException, status, Form, Response, Cookie, Request
 from fastapi.responses import RedirectResponse, JSONResponse
 from pydantic import BaseModel
 from models import get_db
@@ -90,7 +90,41 @@ def create_access_token(data: dict, expires_delta: timedelta = timedelta(hours=1
     to_encode["exp"] = datetime.utcnow() + expires_delta
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-from fastapi import Request, Cookie
+
+@router.post("/logout")
+def logout_customer(response: Response):
+  print("Logout request received")
+
+  # Clear the session cookie
+  response.delete_cookie(
+    key="session",
+    path="/",
+    httponly=True,
+    secure=False,
+    samesite="Lax"
+  )
+
+  # Clear the customer_id cookie
+  response.delete_cookie(
+    key="customer_id",
+    path="/",
+    httponly=True,
+    secure=False,
+    samesite="Lax"
+  )
+
+  # Also try clearing with different configurations in case they were set differently
+  response.delete_cookie(key="session", path="/")
+  response.delete_cookie(key="customer_id", path="/")
+  response.delete_cookie(key="session")
+  response.delete_cookie(key="customer_id")
+
+  print("Authentication cookies cleared")
+
+  return JSONResponse(
+    content={"message": "Logged out successfully"},
+    status_code=200
+  )
 
 @router.get("/verify")
 def verify_session(
