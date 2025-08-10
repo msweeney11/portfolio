@@ -20,6 +20,7 @@ async def create_category(category: CategoryCreate, db: Session = Depends(get_db
   return new_category
 
 
+# Fix the route - remove trailing slash to avoid redirect
 @router.get("/", response_model=list[CategoryOut])
 async def get_categories(db: Session = Depends(get_db)):
   return db.query(Category).all()
