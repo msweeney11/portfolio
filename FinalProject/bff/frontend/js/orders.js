@@ -344,7 +344,7 @@ function filterOrders() {
         return true;
     });
 
-    currentPage = 1; // Reset to first page
+    currentPage = 1;
     displayOrders();
 }
 
@@ -511,8 +511,6 @@ async function handleSupportSubmission(e) {
     }
 
     try {
-        // For now, just simulate sending the support message
-        // In a real app, you'd send this to a support endpoint
         console.log('Support request:', supportData);
 
         showNotification('Support request submitted successfully! We\'ll get back to you soon.', 'success');
@@ -535,13 +533,7 @@ async function handleSupportSubmission(e) {
 // Track order function
 function trackOrder(trackingNumber) {
     if (!trackingNumber) return;
-
-    // In a real app, this would integrate with shipping providers
-    // For now, just show a notification
     showNotification(`Tracking package: ${trackingNumber}`, 'info');
-
-    // You could open a tracking URL in a new window:
-    // window.open(`https://example-shipping.com/track/${trackingNumber}`, '_blank');
 }
 
 // Export orders to CSV

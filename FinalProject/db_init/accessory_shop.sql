@@ -367,6 +367,28 @@ UPDATE products SET image_url = 'https://via.placeholder.com/450x300/34495e/ffff
 UPDATE products SET image_url = 'https://via.placeholder.com/450x300/e67e22/ffffff?text=Power+Bank' WHERE product_id = 9;
 UPDATE products SET image_url = 'https://via.placeholder.com/450x300/3498db/ffffff?text=Phone+Grip' WHERE product_id = 10;
 
+-- Insert customer with email customer@test.com and password 'password123'
+INSERT INTO customers (email_address, password, first_name, last_name, created_at, updated_at)
+VALUES (
+    'customer@test.com',
+    '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewRuUkKC2S8VvZIq',
+    'Test',
+    'Customer',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+);
+
+-- Insert admin user as a customer with email admin@test.com and password 'admin123'
+INSERT INTO customers (email_address, password, first_name, last_name, created_at, updated_at)
+VALUES (
+    'admin@test.com',
+    '$2b$12$K/iXEXqywlaSy.O3DVt9V.UjI5DHwGu6jB0NtDw2f.YHcF8JWQKj6',
+    'Admin',
+    'User',
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
+);
+
 --
 -- Table structure for table `user_sessions`
 --
