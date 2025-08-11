@@ -59,7 +59,7 @@ async def create_product(product: ProductCreate):
     logger.info(f"Creating product: {product.product_name}")
     async with httpx.AsyncClient() as client:
       response = await client.post(
-        "http://products-service:8005/products",
+        "http://products-service:8005/products/",
         json=product.dict(),
         headers={"Content-Type": "application/json"}
       )

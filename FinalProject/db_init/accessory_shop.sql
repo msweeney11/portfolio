@@ -367,20 +367,6 @@ UPDATE products SET image_url = 'https://via.placeholder.com/450x300/34495e/ffff
 UPDATE products SET image_url = 'https://via.placeholder.com/450x300/e67e22/ffffff?text=Power+Bank' WHERE product_id = 9;
 UPDATE products SET image_url = 'https://via.placeholder.com/450x300/3498db/ffffff?text=Phone+Grip' WHERE product_id = 10;
 
--- Optional: Also populate the product_images table for future use
-INSERT INTO product_images (product_id, image_url, alt_text, is_primary, sort_order) VALUES
-(1, 'https://via.placeholder.com/450x300/1a1a1a/ffffff?text=iPhone+15+Case', 'iPhone 15 Pro Silicone Case - Black', 1, 0),
-(2, 'https://via.placeholder.com/450x300/2d3436/ffffff?text=Samsung+S24+Case', 'Samsung Galaxy S24 Rugged Case', 1, 0),
-(3, 'https://via.placeholder.com/450x300/007bff/ffffff?text=USB-C+Charger', 'USB-C Power Delivery Charger 65W', 1, 0),
-(4, 'https://via.placeholder.com/450x300/f39c12/ffffff?text=Lightning+Cable', 'Lightning to USB-C Cable 6ft', 1, 0),
-(5, 'https://via.placeholder.com/450x300/8e44ad/ffffff?text=Wireless+Earbuds', 'Wireless Earbuds Pro', 1, 0),
-(6, 'https://via.placeholder.com/450x300/e74c3c/ffffff?text=BT+Speaker', 'Portable Bluetooth Speaker', 1, 0),
-(7, 'https://via.placeholder.com/450x300/27ae60/ffffff?text=Car+Mount', 'Magnetic Car Phone Mount', 1, 0),
-(8, 'https://via.placeholder.com/450x300/34495e/ffffff?text=Screen+Protector', 'Tempered Glass Screen Protector', 1, 0),
-(9, 'https://via.placeholder.com/450x300/e67e22/ffffff?text=Power+Bank', '20000mAh Power Bank', 1, 0),
-(10, 'https://via.placeholder.com/450x300/3498db/ffffff?text=Phone+Grip', 'PopSocket Phone Grip - Blue', 1, 0);
-
-
 --
 -- Table structure for table `user_sessions`
 --

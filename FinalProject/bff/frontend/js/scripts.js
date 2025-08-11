@@ -604,6 +604,7 @@ async function quickAddToWishlist(productId, productName) {
     }
 }
 
+
 /**
  * Update wishlist badge with current item count
  * Shows total number of items in wishlist badge
