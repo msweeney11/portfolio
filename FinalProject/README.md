@@ -205,6 +205,7 @@ DATA PERSISTENCE
 
 
 
+We are aware of a few bugs such as product images not loading, we tried our best having spent at least 3 hours a day, sometimes upwards of 7, over the last week getting it up and running. Thank you for this opportunity to learn so much about what goes into a functional website
 
 </pre>
 
