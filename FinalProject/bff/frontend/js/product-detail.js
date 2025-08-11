@@ -2,11 +2,19 @@ const API_BASE = '/api';
 
 // Only declare these if they don't exist (to avoid conflicts with scripts.js)
 
+/**
+ * Initialize the page when DOM content is loaded
+ * Sets up event listeners for product detail page initialization
+ */
 document.addEventListener('DOMContentLoaded', function() {
     initializeProductPage();
     loadProduct();
 });
 
+/**
+ * Initialize product page authentication and navigation
+ * Checks if user is logged in and updates navigation accordingly
+ */
 async function initializeProductPage() {
     // Check if user is logged in
     try {
@@ -23,6 +31,10 @@ async function initializeProductPage() {
     }
 }
 
+/**
+ * Load and display product details from URL parameter
+ * Gets product ID from URL query string and fetches product data
+ */
 async function loadProduct() {
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
@@ -49,6 +61,11 @@ async function loadProduct() {
     }
 }
 
+/**
+ * Display product information on the page
+ * Updates all product elements with data from the product object
+ * @param {Object} product - Product object containing all product details
+ */
 function displayProduct(product) {
     // Hide loading, show content
     document.getElementById('product-loading').style.display = 'none';
@@ -123,6 +140,11 @@ function displayProduct(product) {
     }
 }
 
+/**
+ * Update breadcrumb navigation with product information
+ * Sets the breadcrumb links with category and product names
+ * @param {Object} product - Product object containing category information
+ */
 function updateBreadcrumb(product) {
     if (product.category) {
         document.getElementById('breadcrumb-category').textContent = product.category.category_name;
@@ -131,6 +153,11 @@ function updateBreadcrumb(product) {
     document.getElementById('breadcrumb-product').textContent = product.product_name;
 }
 
+/**
+ * Load and display related products from the same category
+ * Fetches products from the same category and displays up to 4 related items
+ * @param {number} categoryId - Category ID to find related products
+ */
 async function loadRelatedProducts(categoryId) {
     if (!categoryId) return;
 
@@ -147,6 +174,11 @@ async function loadRelatedProducts(categoryId) {
     }
 }
 
+/**
+ * Display related products in the related products section
+ * Creates product cards for each related product
+ * @param {Array} products - Array of related product objects
+ */
 function displayRelatedProducts(products) {
     const container = document.getElementById('related-products');
     if (!container) return;
@@ -190,6 +222,11 @@ function displayRelatedProducts(products) {
     }).join('');
 }
 
+/**
+ * Change quantity in the quantity input field
+ * Increases or decreases quantity while maintaining bounds (1-10)
+ * @param {number} change - Amount to change quantity (+1 or -1)
+ */
 function changeQuantity(change) {
     const quantityInput = document.getElementById('quantity');
     const currentValue = parseInt(quantityInput.value);
@@ -197,6 +234,10 @@ function changeQuantity(change) {
     quantityInput.value = newValue;
 }
 
+/**
+ * Add current product to shopping cart
+ * Validates user login, calculates price, and adds item to localStorage cart
+ */
 async function addToCart() {
     if (!currentUser) {
         showNotification('Please log in to add items to cart', 'warning');
@@ -233,6 +274,10 @@ async function addToCart() {
     showNotification(`${currentProduct.product_name} (${quantity}) added to cart!`, 'success');
 }
 
+/**
+ * Add current product to user's wishlist
+ * Validates user login and sends request to wishlist API
+ */
 async function addToWishlist() {
     if (!currentUser) {
         showNotification('Please log in to save items to your wishlist', 'warning');
@@ -271,15 +316,29 @@ async function addToWishlist() {
     }
 }
 
+/**
+ * Show Bootstrap toast notification for cart addition
+ * Displays a toast message when item is added to cart
+ */
 function showCartToast() {
     const toast = new bootstrap.Toast(document.getElementById('cart-toast'));
     toast.show();
 }
 
+/**
+ * Navigate to product detail page
+ * Redirects to product detail page with the specified product ID
+ * @param {number} productId - ID of the product to view
+ */
 function viewProduct(productId) {
     window.location.href = `product-detail.html?id=${productId}`;
 }
 
+/**
+ * Share product on social media platforms
+ * Opens sharing URL for the specified platform
+ * @param {string} platform - Social media platform (facebook, twitter, whatsapp, email)
+ */
 function shareProduct(platform) {
     const url = window.location.href;
     const text = `Check out this ${currentProduct.product_name} on PhoneHub!`;
@@ -306,11 +365,20 @@ function shareProduct(platform) {
     }
 }
 
+/**
+ * Show product not found error state
+ * Hides loading spinner and shows product not found message
+ */
 function showProductNotFound() {
     document.getElementById('product-loading').style.display = 'none';
     document.getElementById('product-not-found').style.display = 'block';
 }
 
+/**
+ * Get customer ID from browser cookies
+ * Parses document.cookie to extract customer_id value
+ * @returns {number|null} Customer ID or null if not found
+ */
 function getCurrentCustomerId() {
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
@@ -324,6 +392,10 @@ function getCurrentCustomerId() {
 
 // Only define these functions if they don't exist (to avoid conflicts with scripts.js)
 if (typeof updateNavigation !== 'function') {
+    /**
+     * Update navigation bar based on user login status
+     * Shows user menu if logged in, otherwise shows login/register buttons
+     */
     function updateNavigation() {
         const navUserSection = document.getElementById('navbar-user-section');
         if (navUserSection && currentUser) {
@@ -375,6 +447,10 @@ if (typeof updateNavigation !== 'function') {
 }
 
 if (typeof updateCartBadge !== 'function') {
+    /**
+     * Update cart badge with current item count
+     * Reads cart from localStorage and updates badge display
+     */
     function updateCartBadge() {
         const cart = JSON.parse(localStorage.getItem('phonehub_cart')) || [];
         const cartBadge = document.getElementById('cart-badge');
@@ -387,6 +463,10 @@ if (typeof updateCartBadge !== 'function') {
 }
 
 if (typeof logout !== 'function') {
+    /**
+     * Log out current user
+     * Clears cookies, localStorage, and redirects to home page
+     */
     async function logout() {
         try {
             document.cookie = 'session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
@@ -407,6 +487,12 @@ if (typeof logout !== 'function') {
 }
 
 if (typeof showNotification !== 'function') {
+    /**
+     * Display notification message to user
+     * Creates and displays a temporary notification alert
+     * @param {string} message - Message to display
+     * @param {string} type - Notification type (info, success, warning, error)
+     */
     function showNotification(message, type = 'info') {
         const existingNotifications = document.querySelectorAll('.phonehub-notification');
         existingNotifications.forEach(notification => notification.remove());

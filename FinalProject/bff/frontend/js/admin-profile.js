@@ -1,10 +1,18 @@
 const API_BASE = '/api';
 
+/**
+ * Initialize admin dashboard when DOM loads
+ * Sets up event listeners and loads dashboard data
+ */
 document.addEventListener('DOMContentLoaded', function() {
     loadDashboardStats();
     loadRecentActivity();
 });
 
+/**
+ * Load dashboard statistics
+ * Fetches and displays key metrics like product count, customer count, etc.
+ */
 async function loadDashboardStats() {
     try {
         // Load products count
@@ -36,7 +44,7 @@ async function loadDashboardStats() {
                 const revenue = orders.reduce((sum, order) => {
                     return sum + calculateOrderTotal(order);
                 }, 0);
-                document.getElementById('total-revenue').textContent = `$${revenue.toFixed(2)}`;
+                document.getElementById('total-revenue').textContent = `${revenue.toFixed(2)}`;
             }
         } catch (error) {
             document.getElementById('total-orders').textContent = '-';
@@ -48,6 +56,12 @@ async function loadDashboardStats() {
     }
 }
 
+/**
+ * Calculate total amount for an order
+ * Sums item prices, shipping, and tax
+ * @param {Object} order - Order object with items and totals
+ * @returns {number} Total order amount
+ */
 function calculateOrderTotal(order) {
     let total = 0;
     if (order.items) {
@@ -60,6 +74,10 @@ function calculateOrderTotal(order) {
     return total;
 }
 
+/**
+ * Load recent activity for dashboard
+ * Fetches and displays recent orders and activities
+ */
 async function loadRecentActivity() {
     const recentActivity = document.getElementById('recent-activity');
     if (!recentActivity) return;
@@ -85,6 +103,11 @@ async function loadRecentActivity() {
     }
 }
 
+/**
+ * Display recent activity items
+ * Creates activity cards for recent orders
+ * @param {Array} orders - Array of recent orders
+ */
 function displayRecentActivity(orders) {
     const recentActivity = document.getElementById('recent-activity');
     if (!recentActivity) return;
@@ -104,7 +127,7 @@ function displayRecentActivity(orders) {
                 <div class="text-muted small">
                     Customer ID: ${order.customer_id} •
                     ${new Date(order.order_date).toLocaleDateString()} •
-                    $${calculateOrderTotal(order).toFixed(2)}
+                    ${calculateOrderTotal(order).toFixed(2)}
                 </div>
                 ${order.items ? `
                     <div class="mt-1">
@@ -121,6 +144,10 @@ function displayRecentActivity(orders) {
     `).join('');
 }
 
+/**
+ * Display no activity message
+ * Shows message when there are no recent activities
+ */
 function displayNoActivity() {
     const recentActivity = document.getElementById('recent-activity');
     if (!recentActivity) return;
@@ -134,6 +161,10 @@ function displayNoActivity() {
     `;
 }
 
+/**
+ * Log out admin user
+ * Clears admin session and redirects to home page
+ */
 async function logout() {
     try {
         // Clear cookies
@@ -153,6 +184,12 @@ async function logout() {
     }
 }
 
+/**
+ * Display notification message to user
+ * Creates and displays a temporary notification alert
+ * @param {string} message - Message to display
+ * @param {string} type - Notification type (info, success, error)
+ */
 function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');

@@ -5,15 +5,23 @@ let currentUser = null;
 let allProducts = [];
 let currentProduct = null;
 let cart = JSON.parse(localStorage.getItem('phonehub_cart')) || [];
-let wishlist = JSON.parse(localStorage.getItem('phonehub_wishlist')) || [];
 
-// Utility: Get query parameters
+/**
+ * Get query parameter value from URL
+ * Extracts parameter value from current page URL
+ * @param {string} param - Parameter name to retrieve
+ * @returns {string|null} Parameter value or null if not found
+ */
 function getQueryParam(param) {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get(param);
 }
 
-// Utility: Check if user is logged in
+/**
+ * Check if user is currently logged in
+ * Verifies authentication status with backend API
+ * @returns {boolean} True if user is logged in, false otherwise
+ */
 async function isLoggedIn() {
   try {
     // Check if user manually logged out (frontend flag)
@@ -54,7 +62,10 @@ async function isLoggedIn() {
   }
 }
 
-// Utility: Redirect if not logged in
+/**
+ * Require user login for protected pages
+ * Redirects to login page if user is not authenticated
+ */
 async function requireLogin() {
   // Skip login check if we just logged in
   if (window.justLoggedIn) {
@@ -71,7 +82,10 @@ async function requireLogin() {
   }
 }
 
-// Enhanced initialization
+/**
+ * Initialize page with authentication and UI updates
+ * Checks login status and updates navigation and badges
+ */
 async function initializePage() {
     console.log("Initializing page...");
 
@@ -96,8 +110,10 @@ async function initializePage() {
     console.log("Auth ready event dispatched");
 }
 
-
-// Navigation update - THIS IS THE KEY FUNCTION
+/**
+ * Update navigation bar based on user login status
+ * Shows user menu if logged in, otherwise shows login/register buttons
+ */
 function updateNavigation() {
     const navUserSection = document.getElementById('navbar-user-section');
     if (!navUserSection) {
@@ -155,7 +171,10 @@ function updateNavigation() {
     }
 }
 
-// Product loading
+/**
+ * Load and display products from API
+ * Fetches all products and creates product cards
+ */
 async function loadProducts() {
   try {
     showLoadingSpinner();
@@ -203,10 +222,10 @@ async function loadProducts() {
                 <div class="mb-3">
                   ${p.discount_percent > 0 ?
                     `<div>
-                        <span class="text-muted text-decoration-line-through small">$${p.list_price}</span>
-                        <div class="fs-5 fw-bold text-primary">$${discountedPrice}</div>
+                        <span class="text-muted text-decoration-line-through small">${p.list_price}</span>
+                        <div class="fs-5 fw-bold text-primary">${discountedPrice}</div>
                     </div>` :
-                    `<div class="fs-5 fw-bold text-primary">$${p.list_price}</div>`
+                    `<div class="fs-5 fw-bold text-primary">${p.list_price}</div>`
                   }
                 </div>
               </div>
@@ -236,6 +255,10 @@ async function loadProducts() {
   }
 }
 
+/**
+ * Show loading spinner while products are loading
+ * Displays a spinner in the product grid container
+ */
 function showLoadingSpinner() {
     const productGrid = document.getElementById('product-grid');
     if (productGrid) {
@@ -250,6 +273,10 @@ function showLoadingSpinner() {
     }
 }
 
+/**
+ * Display error message when products fail to load
+ * Shows error message in the product grid container
+ */
 function displayProductsError() {
     const container = document.getElementById('product-grid');
     if (container) {
@@ -257,7 +284,10 @@ function displayProductsError() {
     }
 }
 
-// Load single product
+/**
+ * Load single product details for product detail page
+ * Fetches product by ID from URL parameter and displays details
+ */
 async function loadProductDetail() {
   try {
     const id = getQueryParam('id');
@@ -288,7 +318,7 @@ async function loadProductDetail() {
     };
 
     if (elements.name) elements.name.textContent = product.product_name || 'Product Name';
-    if (elements.price) elements.price.textContent = `$${product.list_price || '0.00'}`;
+    if (elements.price) elements.price.textContent = `${product.list_price || '0.00'}`;
     if (elements.description) elements.description.textContent = product.description || 'No description available';
     if (elements.image) {
       elements.image.src = 'https://dummyimage.com/600x700/dee2e6/6c757d.jpg';
@@ -308,7 +338,13 @@ async function loadProductDetail() {
   }
 }
 
-// Handle login - ENHANCED VERSION
+/**
+ * Handle user login authentication
+ * Sends login request to API and handles response
+ * @param {string} email - User email address
+ * @param {string} password - User password
+ * @returns {Object} Login response data or error
+ */
 async function login(email, password) {
   try {
     console.log("Attempting login for:", email);
@@ -344,6 +380,11 @@ async function login(email, password) {
   }
 }
 
+/**
+ * Handle login form submission
+ * Processes login form data and redirects on success
+ * @param {Event} e - Form submit event
+ */
 async function handleLogin(e) {
   e.preventDefault();
   const email = document.getElementById("email").value;
@@ -371,7 +412,11 @@ async function handleLogin(e) {
   }
 }
 
-// Handle registration
+/**
+ * Handle user registration form submission
+ * Processes registration form and creates new user account
+ * @param {Event} e - Form submit event
+ */
 async function handleRegister(e) {
   e.preventDefault();
 
@@ -408,7 +453,10 @@ async function handleRegister(e) {
   }
 }
 
-// Cart functions
+/**
+ * Load shopping cart items for authenticated user
+ * Fetches cart items from API and displays them
+ */
 async function loadCart() {
   await requireLogin();
   const res = await fetch('/api/cart-items');
@@ -429,6 +477,10 @@ async function loadCart() {
   }
 }
 
+/**
+ * Update cart badge with current item count
+ * Shows total number of items in cart badge
+ */
 async function updateCartBadge() {
   const badgeEls = document.querySelectorAll('#cart-badge');
 
@@ -462,7 +514,13 @@ async function updateCartBadge() {
   }
 }
 
-// Quick add to cart
+/**
+ * Quick add product to cart from product grid
+ * Adds product to local cart and shows notification
+ * @param {number} productId - Product ID to add
+ * @param {string} productName - Product name for display
+ * @param {number} price - Product price
+ */
 function quickAddToCart(productId, productName, price) {
     if (!currentUser) {
         showNotification('Please log in to add items to cart', 'warning');
@@ -488,48 +546,124 @@ function quickAddToCart(productId, productName, price) {
     showNotification(`${productName} added to cart!`, 'success');
 }
 
+/**
+ * Save cart data to localStorage
+ * Persists cart data in browser local storage
+ */
 function saveCart() {
     localStorage.setItem('phonehub_cart', JSON.stringify(cart));
 }
 
-// Wishlist functions
-function quickAddToWishlist(productId, productName) {
+/**
+ * Quick add product to wishlist from product grid
+ * Adds product to user's wishlist via API
+ * @param {number} productId - Product ID to add
+ * @param {string} productName - Product name for display
+ */
+async function quickAddToWishlist(productId, productName) {
     if (!currentUser) {
         showNotification('Please log in to save items to your wishlist', 'warning');
         return;
     }
 
-    const existingItem = wishlist.find(item => item.productId === productId);
-
-    if (existingItem) {
-        showNotification('Item already in wishlist', 'info');
+    const customerId = getCurrentCustomerId();
+    if (!customerId) {
+        showNotification('Please log in to save items to your wishlist', 'warning');
         return;
     }
 
-    wishlist.push({
-        productId: productId,
-        name: productName,
-        addedAt: new Date().toISOString()
-    });
+    try {
+        const response = await fetch('http://localhost:8006/wishlist/', {  // Direct to wishlist service
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({
+                customer_id: customerId,
+                product_id: productId
+            })
+        });
 
-    saveWishlist();
-    updateWishlistBadge();
-    showNotification(`${productName} added to wishlist!`, 'success');
+        if (response.ok) {
+            showNotification(`${productName} added to wishlist!`, 'success');
+            await updateWishlistBadge(); // Update the badge after adding
+        } else if (response.status === 400) {
+            const errorData = await response.text();
+            if (errorData.includes('already in wishlist')) {
+                showNotification('Item already in wishlist', 'info');
+            } else {
+                showNotification('Failed to add item to wishlist', 'error');
+            }
+        } else {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    } catch (error) {
+        console.error('Error adding to wishlist:', error);
+        showNotification('Failed to add item to wishlist: ' + error.message, 'error');
+    }
 }
 
-function saveWishlist() {
-    localStorage.setItem('phonehub_wishlist', JSON.stringify(wishlist));
+/**
+ * Update wishlist badge with current item count
+ * Shows total number of items in wishlist badge
+ */
+async function updateWishlistBadge() {
+    const wishlistBadges = document.querySelectorAll('.wishlist-badge, .wishlist-count');
+
+    if (!currentUser) {
+        // If not logged in, hide the badge
+        wishlistBadges.forEach(badge => {
+            badge.textContent = '0';
+            badge.style.display = 'none';
+        });
+        return;
+    }
+
+    try {
+        const customerId = getCurrentCustomerId();
+        if (!customerId) {
+            wishlistBadges.forEach(badge => {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            });
+            return;
+        }
+
+        // Use the direct wishlist service port and the count endpoint
+        const response = await fetch(`http://localhost:8006/wishlist/customer/${customerId}/count`, {
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const count = data.count || 0;
+
+            wishlistBadges.forEach(badge => {
+                badge.textContent = count;
+                badge.style.display = count > 0 ? 'inline' : 'none';
+            });
+        } else {
+            console.error('Failed to get wishlist count:', response.status);
+            wishlistBadges.forEach(badge => {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            });
+        }
+    } catch (error) {
+        console.error('Error updating wishlist badge:', error);
+        wishlistBadges.forEach(badge => {
+            badge.textContent = '0';
+            badge.style.display = 'none';
+        });
+    }
 }
 
-function updateWishlistBadge() {
-    const wishlistBadges = document.querySelectorAll('.wishlist-badge');
-    wishlistBadges.forEach(badge => {
-        badge.textContent = wishlist.length;
-        badge.style.display = wishlist.length > 0 ? 'inline' : 'none';
-    });
-}
-
-// Remove item from cart
+/**
+ * Remove item from shopping cart
+ * Deletes cart item via API and refreshes page
+ * @param {number} id - Cart item ID to remove
+ */
 async function removeFromCart(id) {
   try {
     await fetch(`/api/cart-items/${id}`, { method: 'DELETE', credentials: 'include' });
@@ -540,9 +674,10 @@ async function removeFromCart(id) {
   }
 }
 
-// Other functions
-// Replace the existing loadWishlist function in scripts.js with this fixed version:
-
+/**
+ * Load user's wishlist items
+ * Fetches wishlist data and displays items
+ */
 async function loadWishlist() {
   try {
     const customerId = getCurrentCustomerId();
@@ -555,7 +690,7 @@ async function loadWishlist() {
 
     console.log('Loading wishlist for customer:', customerId);
 
-    const res = await fetch(`/api/wishlist/customer/${customerId}`, {
+    const res = await fetch('http://localhost:8006/wishlist/customer/${customerId}', {
       credentials: 'include',
       headers: {
         'Accept': 'application/json'
@@ -603,7 +738,7 @@ async function loadWishlist() {
               <h5 class="card-title">${product.product_name || 'Unknown Product'}</h5>
               <p class="card-text">${product.description || 'No description available'}</p>
               <div class="d-flex justify-content-between align-items-center">
-                <span class="fs-5 fw-bold text-primary">$${product.list_price || '0.00'}</span>
+                <span class="fs-5 fw-bold text-primary">${product.list_price || '0.00'}</span>
                 <div class="btn-group" role="group">
                   <button class="btn btn-outline-primary btn-sm" onclick="addToCart(${item.product_id})">
                     <i class="bi bi-cart-plus"></i>
@@ -626,6 +761,10 @@ async function loadWishlist() {
   }
 }
 
+/**
+ * Display empty wishlist message
+ * Shows message when user has no wishlist items
+ */
 function displayEmptyWishlistInScripts() {
   const container = document.getElementById('wishlist-items');
   if (container) {
@@ -644,15 +783,48 @@ function displayEmptyWishlistInScripts() {
   }
 }
 
-async function removeFromWishlist(id) {
-  try {
-    await fetch(`/api/wishlist/${id}`, { method: 'DELETE', credentials: 'include' });
-    location.reload();
-  } catch (err) {
-    console.error('Failed to remove from wishlist:', err);
-  }
+/**
+ * Remove item from wishlist
+ * Deletes wishlist item via API and reloads wishlist
+ * @param {number} itemId - Wishlist item ID to remove
+ */
+async function removeFromWishlist(itemId) {
+    if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
+        return;
+    }
+
+    try {
+        const response = await fetch('http://localhost:8006/wishlist/${itemId}', {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+
+        if (response.ok) {
+            showNotification('Item removed from wishlist', 'success');
+            // Reload the wishlist page if we're on it
+            if (window.location.pathname.includes('wishlist')) {
+                if (typeof loadWishlist === 'function') {
+                    await loadWishlist();
+                } else {
+                    location.reload();
+                }
+            }
+            await updateWishlistBadge();
+        } else {
+            const errorText = await response.text();
+            throw new Error(errorText || 'Failed to remove item');
+        }
+    } catch (error) {
+        console.error('Error removing from wishlist:', error);
+        showNotification('Failed to remove item from wishlist: ' + error.message, 'error');
+    }
 }
 
+/**
+ * Handle checkout form submission
+ * Processes checkout with address and payment info
+ * @param {Event} e - Form submit event
+ */
 async function handleCheckout(e) {
   e.preventDefault();
   await requireLogin();
@@ -676,6 +848,10 @@ async function handleCheckout(e) {
   }
 }
 
+/**
+ * Load user's order history
+ * Fetches orders from API and displays them
+ */
 async function loadOrders() {
   await requireLogin();
   try {
@@ -700,6 +876,10 @@ async function loadOrders() {
   }
 }
 
+/**
+ * Load user profile information
+ * Fetches customer data and populates profile form
+ */
 async function loadProfile() {
   await requireLogin();
   try {
@@ -714,6 +894,11 @@ async function loadProfile() {
   }
 }
 
+/**
+ * Update user profile information
+ * Saves profile changes via API
+ * @param {Event} e - Form submit event
+ */
 async function updateProfile(e) {
   e.preventDefault();
   const name = document.getElementById('name').value;
@@ -732,6 +917,11 @@ async function updateProfile(e) {
   }
 }
 
+/**
+ * Add product to shopping cart
+ * Adds item to cart via API
+ * @param {number} productId - Product ID to add
+ */
 async function addToCart(productId) {
   if (!currentUser) {
     window.location.href = 'login.html';
@@ -755,7 +945,10 @@ async function addToCart(productId) {
   }
 }
 
-// ENHANCED LOGOUT FUNCTION
+/**
+ * Log out current user
+ * Clears session data and redirects to home page
+ */
 async function logout() {
     try {
         console.log("Logging out...");
@@ -836,7 +1029,11 @@ async function logout() {
     }
 }
 
-// Utility functions
+/**
+ * Get customer ID from browser cookies
+ * Parses document.cookie to extract customer_id value
+ * @returns {number|null} Customer ID or null if not found
+ */
 function getCurrentCustomerId() {
     // Check cookies first since we know this works
     const cookies = document.cookie.split(';');
@@ -857,6 +1054,12 @@ function getCurrentCustomerId() {
     return null;
 }
 
+/**
+ * Display notification message to user
+ * Creates and displays a temporary notification alert
+ * @param {string} message - Message to display
+ * @param {string} type - Notification type (info, success, warning, error)
+ */
 function showNotification(message, type = 'info') {
     // Remove existing notifications
     const existingNotifications = document.querySelectorAll('.phonehub-notification');
@@ -885,6 +1088,10 @@ function showNotification(message, type = 'info') {
 }
 
 // Enhanced page initialization with better error handling
+/**
+ * Initialize page routing and authentication on DOM load
+ * Sets up page-specific functionality based on current route
+ */
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const page = window.location.pathname;
@@ -965,7 +1172,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Search and filter functions (if needed)
+/**
+ * Search products by name or description
+ * Filters products based on search input
+ */
 function searchProducts() {
     const searchInput = document.getElementById('search-input');
     if (!searchInput) return;
@@ -984,6 +1194,11 @@ function searchProducts() {
     displayFilteredProducts(filteredProducts);
 }
 
+/**
+ * Filter products by category
+ * Shows only products from specified category
+ * @param {number} categoryId - Category ID to filter by
+ */
 function filterByCategory(categoryId) {
     if (!categoryId) {
         loadProducts(); // Show all products
@@ -997,6 +1212,11 @@ function filterByCategory(categoryId) {
     displayFilteredProducts(filteredProducts);
 }
 
+/**
+ * Display filtered product results
+ * Creates product cards for filtered products
+ * @param {Array} products - Array of filtered products
+ */
 function displayFilteredProducts(products) {
     const container = document.getElementById('product-grid');
     if (!container) return;
@@ -1062,7 +1282,10 @@ function displayFilteredProducts(products) {
     }
 }
 
-// Price filter functionality
+/**
+ * Initialize price filter functionality
+ * Sets up price range slider and filtering
+ */
 function initializePriceFilter() {
     const priceFilter = document.getElementById('price-filter');
     const priceDisplay = document.getElementById('price-display');
@@ -1081,7 +1304,10 @@ function initializePriceFilter() {
     }
 }
 
-// Sort functionality
+/**
+ * Initialize sort filter functionality
+ * Sets up product sorting dropdown
+ */
 function initializeSortFilter() {
     const sortSelect = document.getElementById('sort-select');
 
@@ -1112,7 +1338,10 @@ function initializeSortFilter() {
     }
 }
 
-// Initialize filters and search when products are loaded
+/**
+ * Initialize filters and search functionality
+ * Sets up all filtering and search features
+ */
 function initializeFiltersAndSearch() {
     // Search functionality
     const searchInput = document.getElementById('search-input');
@@ -1140,7 +1369,11 @@ function initializeFiltersAndSearch() {
     initializeSortFilter();
 }
 
-// Quantity change for product detail modal
+/**
+ * Change quantity in product detail page
+ * Increases or decreases product quantity within bounds
+ * @param {number} change - Amount to change quantity (+1 or -1)
+ */
 function changeQuantity(change) {
     const quantityInput = document.getElementById('quantity');
     if (quantityInput) {
@@ -1155,7 +1388,11 @@ function changeQuantity(change) {
     }
 }
 
-// Modal functions for product detail
+/**
+ * Show product details in modal
+ * Displays product information in a popup modal
+ * @param {number} productId - Product ID to display
+ */
 function showProductModal(productId) {
     const product = allProducts.find(p => p.product_id === productId);
     if (!product) return;
@@ -1214,7 +1451,10 @@ function showProductModal(productId) {
     }
 }
 
-// Add to cart from modal
+/**
+ * Add product to cart from modal
+ * Adds specified quantity of product to cart from modal dialog
+ */
 function addToCartFromModal() {
     if (!currentProduct) return;
 
@@ -1237,7 +1477,10 @@ function addToCartFromModal() {
     }
 }
 
-// Add to wishlist from modal
+/**
+ * Add product to wishlist from modal
+ * Adds product to wishlist from modal dialog
+ */
 function addToWishlistFromModal() {
     if (!currentProduct) return;
 
@@ -1250,7 +1493,6 @@ function addToWishlistFromModal() {
         if (bsModal) bsModal.hide();
     }
 }
-
 
 // Export functions for global access
 window.PhoneHubApp = {
