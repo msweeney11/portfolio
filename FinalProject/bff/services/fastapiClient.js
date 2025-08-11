@@ -20,7 +20,7 @@ export async function registerUser(userData) {
     headers: {
       "Content-Type": "application/json"
     },
-    credentials: "include", // Add this
+    credentials: "include",
     body: JSON.stringify(userData)
   });
 
@@ -40,7 +40,7 @@ export async function verifyLogin(cookie) {
         "Content-Type": "application/json",
         ...(cookie ? { Cookie: cookie } : {})
       },
-      credentials: "include" // Add this
+      credentials: "include"
     });
 
     if (!res.ok) {
@@ -59,7 +59,7 @@ export async function fetchProducts(filters = {}) {
   try {
     const query = new URLSearchParams(filters).toString();
     const res = await fetch(`${BASE_URL}/products${query ? '?' + query : ''}`, {
-      credentials: "include" // Add this to all requests that might need auth
+      credentials: "include"
     });
 
     if (!res.ok) {

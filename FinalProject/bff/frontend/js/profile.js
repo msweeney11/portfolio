@@ -1,5 +1,9 @@
 const API_BASE = '/api';
 
+/**
+ * Initialize page when DOM content is loaded
+ * Sets up event listeners and loads initial data
+ */
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
     initializeForms();
@@ -7,6 +11,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUserOrders();
 });
 
+/**
+ * Initialize page authentication and user verification
+ * Checks if user is logged in, redirects to login if not authenticated
+ */
 async function initializePage() {
     // Check if user is logged in
     try {
@@ -26,6 +34,10 @@ async function initializePage() {
     }
 }
 
+/**
+ * Update profile information display
+ * Shows welcome message and user email in the UI
+ */
 function updateProfileInfo() {
     if (!currentUser) return;
 
@@ -40,6 +52,10 @@ function updateProfileInfo() {
     }
 }
 
+/**
+ * Load user profile data from API
+ * Fetches customer data and populates the profile form
+ */
 async function loadUserProfile() {
     try {
         const customerId = getCurrentCustomerId();
@@ -58,6 +74,11 @@ async function loadUserProfile() {
     }
 }
 
+/**
+ * Populate profile form with user data
+ * Fills form fields with customer information
+ * @param {Object} profile - Customer profile data
+ */
 function populateProfileForm(profile) {
     const firstNameInput = document.getElementById('firstName');
     const lastNameInput = document.getElementById('lastName');
@@ -68,6 +89,10 @@ function populateProfileForm(profile) {
     if (emailAddressInput) emailAddressInput.value = profile.email_address || '';
 }
 
+/**
+ * Load user's order history from API
+ * Fetches orders for current customer and displays them
+ */
 async function loadUserOrders() {
     const ordersList = document.getElementById('orders-list');
     if (!ordersList) return;
@@ -111,6 +136,11 @@ async function loadUserOrders() {
     }
 }
 
+/**
+ * Display user orders in the orders list
+ * Creates order cards for each order with details and actions
+ * @param {Array} orders - Array of order objects
+ */
 function displayOrders(orders) {
     const ordersList = document.getElementById('orders-list');
     if (!ordersList) return;
@@ -183,6 +213,10 @@ function displayOrders(orders) {
     `).join('');
 }
 
+/**
+ * Display message when user has no orders
+ * Shows empty state with link to start shopping
+ */
 function displayNoOrders() {
     const ordersList = document.getElementById('orders-list');
     if (!ordersList) return;
@@ -200,6 +234,11 @@ function displayNoOrders() {
     `;
 }
 
+/**
+ * Display error message when orders fail to load
+ * Shows error state with retry button
+ * @param {string} message - Error message to display
+ */
 function displayOrdersError(message) {
     const ordersList = document.getElementById('orders-list');
     if (!ordersList) return;
@@ -216,6 +255,12 @@ function displayOrdersError(message) {
     `;
 }
 
+/**
+ * Calculate total amount for an order
+ * Sums item prices, shipping, and tax
+ * @param {Object} order - Order object with items and totals
+ * @returns {string} Formatted total amount
+ */
 function calculateOrderTotal(order) {
     let total = 0;
 
@@ -241,6 +286,12 @@ function calculateOrderTotal(order) {
     return Math.max(0, total).toFixed(2);
 }
 
+/**
+ * Get order status display text
+ * Converts order status to user-friendly text
+ * @param {Object} order - Order object with status information
+ * @returns {string} Formatted status text
+ */
 function getOrderStatus(order) {
     if (order.order_status) {
         return order.order_status.charAt(0).toUpperCase() + order.order_status.slice(1);
@@ -253,6 +304,12 @@ function getOrderStatus(order) {
     }
 }
 
+/**
+ * Get Bootstrap color class for order status
+ * Returns appropriate color class based on order status
+ * @param {Object} order - Order object with status information
+ * @returns {string} Bootstrap color class
+ */
 function getOrderStatusColor(order) {
     const status = (order.order_status || order.status || '').toLowerCase();
 
@@ -272,7 +329,11 @@ function getOrderStatusColor(order) {
     }
 }
 
-// Order action functions
+/**
+ * View detailed information for a specific order
+ * Displays order details (placeholder implementation)
+ * @param {number} orderId - ID of the order to view
+ */
 function viewOrderDetails(orderId) {
     // You can implement a modal or redirect to a detailed order page
     console.log('View details for order:', orderId);
@@ -280,6 +341,11 @@ function viewOrderDetails(orderId) {
     // Example: window.location.href = `order-details.html?id=${orderId}`;
 }
 
+/**
+ * Track order with tracking number
+ * Opens tracking page or shows tracking information
+ * @param {string} trackingNumber - Tracking number for the shipment
+ */
 function trackOrder(trackingNumber) {
     if (!trackingNumber) {
         showNotification('No tracking number available', 'warning');
@@ -293,6 +359,11 @@ function trackOrder(trackingNumber) {
     // Example: window.open(`https://tools.usps.com/go/TrackConfirmAction?qtc_tLabels1=${trackingNumber}`, '_blank');
 }
 
+/**
+ * Reorder items from a previous order
+ * Adds items from previous order back to cart
+ * @param {number} orderId - ID of the order to reorder
+ */
 function reorderItems(orderId) {
     console.log('Reorder items from order:', orderId);
     showNotification(`Reordering items from order #${orderId}`, 'success');
@@ -301,6 +372,10 @@ function reorderItems(orderId) {
     // This would typically involve fetching the order details and adding items to cart
 }
 
+/**
+ * Initialize form event handlers
+ * Sets up event listeners for profile, password, and address forms
+ */
 function initializeForms() {
     // Profile form
     const profileForm = document.getElementById('profile-form');
@@ -321,6 +396,11 @@ function initializeForms() {
     }
 }
 
+/**
+ * Handle profile form submission
+ * Updates customer profile information via API
+ * @param {Event} e - Form submit event
+ */
 async function handleProfileUpdate(e) {
     e.preventDefault();
 
@@ -355,6 +435,11 @@ async function handleProfileUpdate(e) {
     }
 }
 
+/**
+ * Handle password change form submission
+ * Validates and updates user password
+ * @param {Event} e - Form submit event
+ */
 async function handlePasswordUpdate(e) {
     e.preventDefault();
 
@@ -376,6 +461,11 @@ async function handlePasswordUpdate(e) {
     showNotification('Password update functionality coming soon', 'info');
 }
 
+/**
+ * Handle address form submission
+ * Adds new address for the customer
+ * @param {Event} e - Form submit event
+ */
 async function handleAddressAdd(e) {
     e.preventDefault();
 
@@ -399,6 +489,11 @@ async function handleAddressAdd(e) {
     }
 }
 
+/**
+ * Get customer ID from browser cookies
+ * Parses document.cookie to extract customer_id value
+ * @returns {number|null} Customer ID or null if not found
+ */
 function getCurrentCustomerId() {
     // Extract customer ID from cookie
     const cookies = document.cookie.split(';');
@@ -411,6 +506,10 @@ function getCurrentCustomerId() {
     return null;
 }
 
+/**
+ * Log out current user
+ * Clears user session and redirects to home page
+ */
 async function logout() {
     try {
         // Clear local state
@@ -432,6 +531,12 @@ async function logout() {
     }
 }
 
+/**
+ * Display notification message to user
+ * Creates and displays a temporary notification alert
+ * @param {string} message - Message to display
+ * @param {string} type - Notification type (info, success, error)
+ */
 function showNotification(message, type = 'info') {
     // Create notification element
     const notification = document.createElement('div');

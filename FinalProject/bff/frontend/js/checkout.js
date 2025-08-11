@@ -1,4 +1,3 @@
-// js/checkout.js
 // Add currentUser variable at the top with other variables
 const API_BASE = '/api';
 let cartItems = [];

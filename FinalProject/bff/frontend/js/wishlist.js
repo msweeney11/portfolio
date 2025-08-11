@@ -1,5 +1,9 @@
 const API_BASE = 'http://localhost:8006';
 
+/**
+ * Load user's wishlist items from API
+ * Fetches wishlist data and displays items or empty state
+ */
 async function loadWishlist() {
     try {
         const customerId = getCurrentCustomerId();
@@ -47,6 +51,11 @@ async function loadWishlist() {
     }
 }
 
+/**
+ * Display wishlist items in the UI
+ * Creates cards for each wishlist item with actions
+ * @param {Array} wishlist - Array of wishlist items
+ */
 function displayWishlist(wishlist) {
     const container = document.getElementById('wishlist-items');
     if (!container) {
@@ -93,10 +102,10 @@ function displayWishlist(wishlist) {
                     <div class="price-section mb-3">
                         ${discountPrice ?
                             `<div>
-                                <span class="text-muted text-decoration-line-through small">$${price}</span>
-                                <div class="fs-5 fw-bold text-primary">$${discountPrice}</div>
+                                <span class="text-muted text-decoration-line-through small">${price}</span>
+                                <div class="fs-5 fw-bold text-primary">${discountPrice}</div>
                             </div>` :
-                            `<div class="fs-5 fw-bold text-primary">$${price}</div>`
+                            `<div class="fs-5 fw-bold text-primary">${price}</div>`
                         }
                     </div>
                     <div class="mt-auto">
@@ -134,6 +143,10 @@ function displayWishlist(wishlist) {
     updateWishlistCount(wishlist.length);
 }
 
+/**
+ * Display empty wishlist state
+ * Shows message when user has no wishlist items
+ */
 function displayEmptyWishlist() {
     const container = document.getElementById('wishlist-items');
     if (!container) return;
@@ -154,6 +167,11 @@ function displayEmptyWishlist() {
     updateWishlistCount(0);
 }
 
+/**
+ * Remove item from user's wishlist
+ * Confirms action and removes item via API
+ * @param {number} itemId - Wishlist item ID to remove
+ */
 async function removeFromWishlist(itemId) {
     if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
         return;
@@ -178,6 +196,12 @@ async function removeFromWishlist(itemId) {
     }
 }
 
+/**
+ * Add wishlist item to shopping cart
+ * Adds product from wishlist to cart via API
+ * @param {number} productId - Product ID to add to cart
+ * @param {string} productName - Product name for display
+ */
 async function addToCartFromWishlist(productId, productName) {
     try {
         const customerId = getCurrentCustomerId();
@@ -215,6 +239,10 @@ async function addToCartFromWishlist(productId, productName) {
     }
 }
 
+/**
+ * Clear all items from user's wishlist
+ * Confirms action and removes all wishlist items
+ */
 async function clearWishlist() {
     if (!confirm('Are you sure you want to remove all items from your wishlist?')) {
         return;
@@ -245,10 +273,20 @@ async function clearWishlist() {
     }
 }
 
+/**
+ * Navigate to product detail page
+ * Redirects to product detail page for specified product
+ * @param {number} productId - Product ID to view
+ */
 async function viewProduct(productId) {
     window.location.href = `product-detail.html?id=${productId}`;
 }
 
+/**
+ * Get customer ID from browser cookies
+ * Parses document.cookie to extract customer_id value
+ * @returns {number|null} Customer ID or null if not found
+ */
 function getCurrentCustomerId() {
     // First check cookies - this is most reliable since your logs show it works
     const cookies = document.cookie.split(';');
@@ -279,6 +317,11 @@ function getCurrentCustomerId() {
     return null;
 }
 
+/**
+ * Update wishlist count display
+ * Updates count elements and page title with wishlist item count
+ * @param {number} count - Number of items in wishlist
+ */
 function updateWishlistCount(count) {
     const countElements = document.querySelectorAll('.wishlist-count');
     countElements.forEach(element => {
@@ -292,6 +335,12 @@ function updateWishlistCount(count) {
     }
 }
 
+/**
+ * Format date string for display
+ * Converts date string to user-friendly format
+ * @param {string} dateString - Date string to format
+ * @returns {string} Formatted date string
+ */
 function formatDate(dateString) {
     if (!dateString) return 'Unknown';
 
@@ -307,6 +356,10 @@ function formatDate(dateString) {
     }
 }
 
+/**
+ * Log out current user from wishlist page
+ * Clears session and redirects to home page
+ */
 async function logout() {
     try {
         // Call logout from main scripts.js if available
@@ -331,6 +384,12 @@ async function logout() {
     }
 }
 
+/**
+ * Display notification message to user
+ * Creates and displays a temporary notification alert
+ * @param {string} message - Message to display
+ * @param {string} type - Notification type (info, success, warning, error)
+ */
 function showNotification(message, type = 'info') {
     // Remove existing notifications
     const existingNotifications = document.querySelectorAll('.phonehub-notification');
@@ -358,15 +417,28 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
+/**
+ * Display error notification
+ * Convenience method for showing error messages
+ * @param {string} message - Error message to display
+ */
 function showError(message) {
     showNotification(message, 'error');
 }
 
+/**
+ * Display success notification
+ * Convenience method for showing success messages
+ * @param {string} message - Success message to display
+ */
 function showSuccess(message) {
     showNotification(message, 'success');
 }
 
-// Initialize wishlist when page loads - wait for auth to complete
+/**
+ * Initialize wishlist page when DOM loads
+ * Sets up event listeners and loads wishlist data
+ */
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Wishlist page loaded, initializing...');
 
