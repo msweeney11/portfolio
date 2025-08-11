@@ -174,6 +174,38 @@ COMMANDS:
     version
       Displays the CLI tool version
       EX: python phonehubCLD.py version
+
+
+DATA PERSISTENCE
+
+  Database Technology:
+    - MySQL 9.3.0 as the primary database system
+
+    Characteristics:
+      - Database Name: accessory_shop
+      - Character Set: utf8mb4 with utf8mb4_0900_ai_ci collation
+      - Storage Engine: InnoDB for ACID compliance and foreign key support
+      - Architecture: Shared database across microservices (not database-per-service pattern)
+
+  Data Storage Strategy:
+    - Centralized Database: All microservices connect to a single MySQL instance
+    - Service Isolation: Each microservice accesses only relevant tables for its domain
+    - Foreign Key Constraints: Maintains referential integrity across related entities
+    - Soft Deletes: Some tables use status flags rather than hard deletes
+    - Audit Trail: Timestamps for creation and modification tracking
+
+  Key Data Characteristics:
+    - Password Security: Bcrypt hashing with salt for customer and admin passwords
+    - Session Management: Token-based authentication with expiration tracking
+    - Inventory Management: Real-time product catalog with pricing and discounts
+    - Order Processing: Complete order lifecycle from cart to delivery(NOT IMPLEMENTED)
+    - Customer Data: Comprehensive customer profiles with address management
+(ER DIAGRAM)
+<img width="3840" height="3379" alt="Untitled diagram _ Mermaid Chart-2025-08-11-014050" src="https://github.com/user-attachments/assets/93997f97-aedc-4eed-9abd-55eeb6dc429c" />
+
+
+
+
 </pre>
 
 
