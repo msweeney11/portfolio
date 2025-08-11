@@ -2,7 +2,7 @@ import express from "express";
 import { verifySession } from "../middleware/sessionChecker.js";
 
 const router = express.Router();
-const ORDER_SERVICE_URL = process.env.ORDER_URL || "http://order-service:8004";
+const ORDER_SERVICE_URL = process.env.ORDER_URL || "http://order-service:8007";
 
 // POST /api/orders — Creates new order via order service (protected route)
 // Requires session verification, forwards order data to order service

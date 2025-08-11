@@ -43,7 +43,7 @@ async function loadCart() {
         document.getElementById('cart-content').style.display = 'none';
         document.getElementById('empty-cart').style.display = 'none';
 
-        // Load cart from localStorage (in production, this would be from cart service)
+        // Load cart from localStorage
         const localCart = JSON.parse(localStorage.getItem('phonehub_cart')) || [];
 
         if (localCart.length === 0) {
@@ -379,7 +379,6 @@ async function confirmMoveToWishlist() {
     try {
         const item = cartItems[selectedItemForWishlist];
 
-        // Add to wishlist via API (if available) or localStorage
         const customerId = getCurrentCustomerId();
         if (customerId && item.product) {
             const response = await fetch(`${API_BASE}/wishlist`, {
@@ -640,7 +639,6 @@ function viewProduct(productId) {
 }
 
 function saveCart() {
-    // Save to localStorage (in production, this would sync with cart service)
     const cartData = cartItems.map(item => ({
         productId: item.productId || (item.product && item.product.product_id),
         name: item.name || (item.product && item.product.product_name),

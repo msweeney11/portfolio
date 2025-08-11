@@ -1,4 +1,3 @@
-// Add currentUser variable at the top with other variables
 const API_BASE = '/api';
 let cartItems = [];
 let orderSummary = {
@@ -338,19 +337,19 @@ async function placeOrder() {
         // Prepare order data with complete information
         const orderData = {
             customer_id: customerId,
-            order_total: orderSummary.total,        // Add order total
+            order_total: orderSummary.total,
             ship_amount: orderSummary.shipping,
             tax_amount: orderSummary.tax,
-            ship_address_id: 1, // In a real app, this would be from address management
+            ship_address_id: 1,
             card_type: document.getElementById('cardType').value,
             card_number: document.getElementById('cardNumber').value.replace(/\s/g, '').slice(-4).padStart(16, '*'),
             card_expires: document.getElementById('cardExpiry').value,
-            billing_address_id: 1, // In a real app, this would be from address management
+            billing_address_id: 1,
             items: cartItems.map(item => ({
                 product_id: item.productId,
-                product_name: item.name,            // Include product name
-                item_price: item.price,             // Keep original price field
-                price: item.price,                  // Add price as fallback
+                product_name: item.name,
+                item_price: item.price,
+                price: item.price,
                 discount_amount: 0,
                 quantity: item.quantity
             }))
